@@ -34,3 +34,11 @@ def Pragma_foreign_key_on(cursor):
     except sqlite3.Error as error:
         print("Error handling PRAGMA foreign keys")
         print(error)
+
+
+"""------------------------------------------------------------------------------
+                                Sección de utilidades
+   ------------------------------------------------------------------------------"""
+
+
+
