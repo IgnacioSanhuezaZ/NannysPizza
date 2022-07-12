@@ -8,10 +8,16 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtWidgets import QMainWindow, QDialog
+from PyQt5.uic import loadUi
+
+from inicio_session import Ui_inicio_session
 
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
+        print("Main set up")
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1239, 815)
         MainWindow.setStyleSheet("")
@@ -139,7 +145,8 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuAdministrar_Sesi_n.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(3)
+        self.tabWidget.setCurrentIndex(0)
+        # self.block_unblock_all(operation=False)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -163,3 +170,95 @@ class Ui_MainWindow(object):
         self.actionIniciar_Sesi_n.setText(_translate("MainWindow", "Iniciar esión"))
         self.actionCerrar_caja.setText(_translate("MainWindow", "Cerrar caja"))
         self.actionCerrar_sesi_n.setText(_translate("MainWindow", "Cerrar sesión"))
+
+    def block_unblock_all(self, operation: bool = False):
+        self.centralwidget.setEnabled(operation)
+        self.groupBox.setEnabled(operation)
+        self.verticalLayoutWidget.setEnabled(operation)
+        self.verticalLayout_2.setEnabled(operation)
+        self.horizontalLayout.setEnabled(operation)
+        self.label_2.setEnabled(operation)
+        self.lineEdit.setEnabled(operation)
+        self.horizontalLayout_3.setEnabled(operation)
+        self.label_3.setEnabled(operation)
+        self.lineEdit_2.setEnabled(operation)
+        self.horizontalLayout_4.setEnabled(operation)
+        self.label_4.setEnabled(operation)
+        self.lineEdit_3.setEnabled(operation)
+        self.radioButton.setEnabled(operation)
+        self.tabWidget.setEnabled(operation)
+        self.tab_3.setEnabled(operation)
+        self.tab_6.setEnabled(operation)
+        self.tab_4.setEnabled(operation)
+        self.tab_7.setEnabled(operation)
+        self.tab_5.setEnabled(operation)
+        self.pushButton.setEnabled(operation)
+        self.pushButton_2.setEnabled(operation)
+        self.pushButton_3.setEnabled(operation)
+        self.label.setEnabled(operation)
+        self.groupBox_2.setEnabled(operation)
+        self.treeView.setEnabled(operation)
+        self.menubar.setEnabled(operation)
+        self.menuAdministrar_Sesi_n.setEnabled(operation)
+        self.statusbar.setEnabled(operation)
+        self.actionIniciar_Sesi_n.setEnabled(operation)
+        self.actionCerrar_caja.setEnabled(operation)
+        self.actionCerrar_sesi_n.setEnabled(operation)
+
+    def login(self):
+        close = QtWidgets.QMessageBox.question(self,
+                                               "INICIO DE SESIÓN",
+                                               "Complete sus datos para iniciar sesión: ",
+                                               Window.Yes | Window.No)
+        acces_token = self.acces_token
+        if close == Window.Yes:
+            acces_token = close.access_token
+            self.close()
+
+        else:
+            pass
+
+
+class FindReplaceDialog(QtWidgets.QMessageBox):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        loadUi("UI/Main_loged.ui", self)
+
+
+class Window(QtWidgets.QMessageBox, Ui_inicio_session):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.parent = parent
+        self.setupUi(self)
+        self.connectSignalsSlots()
+
+    def connectSignalsSlots(self):
+        self.boton_ingreso.clicked.connect(self.processEvent)
+
+    def findAndReplace(self):
+        dialog = FindReplaceDialog(self)
+        dialog.exec()
+
+    @pyqtSlot()
+    def closeEvent(self):
+        close = QtWidgets.QMessageBox.question(self,
+                                               "SALIR",
+                                               "¿Está segura de querer salir?",
+                                               QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+        acces_token = self.acces_token
+        if close == QtWidgets.QMessageBox.Yes:
+            acces_token = self.acces_token
+            self.close()
+
+        else:
+            pass
+
+    @pyqtSlot()
+    def processEvent(self):
+        acces_token = self.acces_token
+        print("acces_token =", acces_token)
+
+        if acces_token:
+            self.close()
