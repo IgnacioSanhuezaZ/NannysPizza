@@ -237,6 +237,10 @@ color: rgb(255, 0, 0);</string>
    </property>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>usuario_input</tabstop>
+  <tabstop>clave_input</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

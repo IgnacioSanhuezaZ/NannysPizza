@@ -15,6 +15,7 @@ def control_acceso(credenciales):
     cursor.close()
     return usu_tipo_usuario
 
+
 def Ingreso_cuenta(args):
     cursor = db.get_db()
     db.Pragma_foreign_key_on(cursor)

@@ -15,7 +15,10 @@ from inicio_session_dialogo import Ui_inicio_session
 
 from MainWindow_loged import Ui_MainWindow
 
-global acces_token
+global access_token
+global user_name
+global is_admin
+
 
 class Window(QMainWindow, Ui_inicio_session):
 
@@ -31,26 +34,14 @@ class Window(QMainWindow, Ui_inicio_session):
         dialog = FindReplaceDialog(self)
         dialog.exec()
 
-    @pyqtSlot()
-    def closeEvent(self):
-        close = QtWidgets.QMessageBox.question(self,
-                                               "SALIR",
-                                               "¿Está segura de querer salir?",
-                                               QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
-        acces_token = self.acces_token
-        if close == QtWidgets.QMessageBox.Yes:
-            acces_token = self.acces_token
-            self.close()
-
-        else:
-            pass
-
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
+        globals()['user_name'] = "test"
+        globals()['is_admin'] = False
         self.loginForm()
-        self.setupUi(self)
+        self.setupUi(self, user_name=globals()['user_name'], is_admin=globals()['is_admin'])
         self.connectSignalsSlots()
 
     def connectSignalsSlots(self):
@@ -64,15 +55,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         dialog = QDialog()
         dialog.ui = Window()
         dialog.ui.setupUi(dialog)
-        print("A punto...")
         dialog.exec()
-        acces_token = dialog.ui.acces_token
-        print("Pasó...")
-        if not acces_token:
-            self.close()
-
-        else:
-            pass
+        globals()['access_token'] = dialog.ui.acces_token
+        globals()['user_name'] = dialog.ui.user_name
+        globals()['is_admin'] = dialog.ui.user_admin
+        print(globals().values())
 
 
 class FindReplaceDialog(QDialog):
@@ -88,7 +75,7 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     ui = MainWindow()
     MainWindow = QtWidgets.QMainWindow()
-    ui.setupUi(MainWindow)
+    ui.setupUi(MainWindow, globals()['user_name'], globals()['is_admin'])
     MainWindow.show()
     sys.exit(app.exec_())
 

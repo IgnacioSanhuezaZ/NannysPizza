@@ -52,7 +52,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit"/>
+         <widget class="QLineEdit" name="lineEdit_Nombre"/>
         </item>
        </layout>
       </item>
@@ -66,7 +66,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_2"/>
+         <widget class="QLineEdit" name="lineEdit_Direcion"/>
         </item>
        </layout>
       </item>
@@ -80,27 +80,101 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_3"/>
+         <widget class="QLineEdit" name="lineEdit_Telefono"/>
         </item>
        </layout>
       </item>
      </layout>
     </widget>
-    <widget class="QRadioButton" name="radioButton">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
+    <widget class="QWidget" name="verticalLayoutWidget_2">
      <property name="geometry">
       <rect>
-       <x>610</x>
-       <y>80</y>
-       <width>82</width>
-       <height>17</height>
+       <x>580</x>
+       <y>20</y>
+       <width>180</width>
+       <height>141</height>
       </rect>
      </property>
-     <property name="text">
-      <string>Despacho</string>
-     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QPushButton" name="pushButton_Buscar_cliente">
+          <property name="text">
+           <string>Buscar</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_Crear_cliente">
+          <property name="text">
+           <string>Crear</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_8">
+        <item>
+         <widget class="QLabel" name="label_7">
+          <property name="text">
+           <string>Zona</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="cmb_zona_cliente">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <item>
+           <property name="text">
+            <string>1: Cuidad Satélite</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>2: Padre Hurtado y otros</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>3: Más allá</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_7">
+        <item>
+         <widget class="QRadioButton" name="radioBtn_Pedidos_Ya">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Pedidos Ya!</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="radioBtn_Despacho">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Despacho</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
     </widget>
    </widget>
    <widget class="QTabWidget" name="tabWidget">
@@ -119,9 +193,12 @@
      <bool>false</bool>
     </property>
     <property name="currentIndex">
-     <number>3</number>
+     <number>4</number>
     </property>
-    <widget class="QWidget" name="tab_3">
+    <widget class="QWidget" name="tab_Pizzas">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="autoFillBackground">
       <bool>false</bool>
      </property>
@@ -133,7 +210,7 @@
       <string>Pizzas</string>
      </attribute>
     </widget>
-    <widget class="QWidget" name="tab_6">
+    <widget class="QWidget" name="tab_Empnadas">
      <attribute name="icon">
       <iconset>
        <normaloff>../Resources/chicken_quesadilla.png</normaloff>../Resources/chicken_quesadilla.png</iconset>
@@ -142,7 +219,7 @@
       <string>Empanadas</string>
      </attribute>
     </widget>
-    <widget class="QWidget" name="tab_4">
+    <widget class="QWidget" name="tab_Agregados">
      <attribute name="icon">
       <iconset>
        <normaloff>../Resources/bbq-ribs-clipart-17336204-an-image-of-barbecue-spare-ribs.png</normaloff>../Resources/bbq-ribs-clipart-17336204-an-image-of-barbecue-spare-ribs.png</iconset>
@@ -151,7 +228,7 @@
       <string>Agregados</string>
      </attribute>
     </widget>
-    <widget class="QWidget" name="tab_7">
+    <widget class="QWidget" name="tab_Bebidas">
      <attribute name="icon">
       <iconset>
        <normaloff>../Resources/3-bebidas.png</normaloff>../Resources/3-bebidas.png</iconset>
@@ -160,7 +237,7 @@
       <string>Bebidas</string>
      </attribute>
     </widget>
-    <widget class="QWidget" name="tab_5">
+    <widget class="QWidget" name="tab_Promociones">
      <attribute name="icon">
       <iconset>
        <normaloff>../Resources/estrella.png</normaloff>../Resources/estrella.png</iconset>
@@ -170,10 +247,10 @@
      </attribute>
     </widget>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="pushButton_Editar">
     <property name="geometry">
      <rect>
-      <x>40</x>
+      <x>950</x>
       <y>740</y>
       <width>75</width>
       <height>23</height>
@@ -183,10 +260,10 @@
      <string>Editar</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_2">
+   <widget class="QPushButton" name="pushButton_Pagar">
     <property name="geometry">
      <rect>
-      <x>170</x>
+      <x>1080</x>
       <y>740</y>
       <width>75</width>
       <height>23</height>
@@ -194,19 +271,6 @@
     </property>
     <property name="text">
      <string>Pagar</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButton_3">
-    <property name="geometry">
-     <rect>
-      <x>300</x>
-      <y>740</y>
-      <width>75</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Despacho</string>
     </property>
    </widget>
    <widget class="QLabel" name="label">
@@ -237,7 +301,7 @@
     <property name="title">
      <string>Venta</string>
     </property>
-    <widget class="QTreeView" name="treeView">
+    <widget class="QTreeView" name="treeView_Venta">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -254,9 +318,8 @@
    <zorder>label</zorder>
    <zorder>groupBox</zorder>
    <zorder>tabWidget</zorder>
-   <zorder>pushButton</zorder>
-   <zorder>pushButton_2</zorder>
-   <zorder>pushButton_3</zorder>
+   <zorder>pushButton_Editar</zorder>
+   <zorder>pushButton_Pagar</zorder>
    <zorder>groupBox_2</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -268,18 +331,18 @@
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuAdministrar_Sesi_n">
+   <widget class="QMenu" name="menuAdministrar_Sesion">
     <property name="title">
      <string>Administrar Sesión</string>
     </property>
-    <addaction name="actionIniciar_Sesi_n"/>
+    <addaction name="actionIniciar_Sesion"/>
+    <addaction name="actionCerrar_sesion"/>
     <addaction name="actionCerrar_caja"/>
-    <addaction name="actionCerrar_sesi_n"/>
    </widget>
-   <addaction name="menuAdministrar_Sesi_n"/>
+   <addaction name="menuAdministrar_Sesion"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionIniciar_Sesi_n">
+  <action name="actionIniciar_Sesion">
    <property name="text">
     <string>Iniciar esión</string>
    </property>
@@ -289,7 +352,7 @@
     <string>Cerrar caja</string>
    </property>
   </action>
-  <action name="actionCerrar_sesi_n">
+  <action name="actionCerrar_sesion">
    <property name="text">
     <string>Cerrar sesión</string>
    </property>

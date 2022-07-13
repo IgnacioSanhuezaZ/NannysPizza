@@ -28,7 +28,7 @@ class Ui_inicio_session(QtWidgets.QDialog):
         icon.addPixmap(QtGui.QPixmap(".\\UI\\../Resources/pizza_slice_256.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         inicio_session.setWindowIcon(icon)
         inicio_session.setStyleSheet("background-color: rgb(8, 185, 16);\n"
-"alternate-background-color: rgb(255, 255, 255);")
+        "alternate-background-color: rgb(255, 255, 255);")
         inicio_session.setSizeGripEnabled(True)
         self.Ingreso = QtWidgets.QDialogButtonBox(inicio_session)
         self.Ingreso.setGeometry(QtCore.QRect(40, 280, 341, 32))
@@ -94,15 +94,19 @@ class Ui_inicio_session(QtWidgets.QDialog):
         self.Error_label = QtWidgets.QLabel(inicio_session)
         self.Error_label.setGeometry(QtCore.QRect(130, 150, 181, 16))
         self.Error_label.setStyleSheet("font: 8pt \"MS Shell Dlg 2\";\n"
-"color: rgb(255, 0, 0);")
+        "color: rgb(255, 0, 0);")
         self.Error_label.setText("")
         self.Error_label.setObjectName("Error_label")
         self.acces_token = False
+        self.user_name = ""
+        self.user_admin = False
 
         self.retranslateUi(inicio_session)
         self.Ingreso.accepted.connect(lambda: self.on_click_ingreso())
-        self.Ingreso.rejected.connect(lambda: self.closeEvent())
+        self.Ingreso.rejected.connect(lambda: self.closingEvent())
         QtCore.QMetaObject.connectSlotsByName(inicio_session)
+        inicio_session.setTabOrder(self.usuario_input, self.clave_input)
+        self.usuario_input.setFocus()
 
     @pyqtSlot()
     def on_click_ingreso(self):
@@ -112,12 +116,16 @@ class Ui_inicio_session(QtWidgets.QDialog):
         if type(acceso) == list and acceso[-1] == "error":
             self.Error_label.setText(acceso[0])
         else:
+            acceso = acceso[0]
             self.Error_label.setText("")
             self.acces_token = True
+            self.user_name = acceso['Nombre_usuario']
+            if acceso['Administra'] == 1:
+                self.user_admin = True
             self.inicio_session.accept()
 
     @pyqtSlot()
-    def closeEvent(self, *event):
+    def closingEvent(self):
         close = QtWidgets.QMessageBox.question(self,
                                                "SALIR",
                                                "¿Está segura de querer salir?",
@@ -127,12 +135,6 @@ class Ui_inicio_session(QtWidgets.QDialog):
 
         else:
             pass
-
-    def exec_(self):
-        print("En ejecución")
-        super(Ui_inicio_session, self).exec_()
-        print("Fin ejecución")
-        return self.acces_token
 
     def retranslateUi(self, inicio_session):
         _translate = QtCore.QCoreApplication.translate
