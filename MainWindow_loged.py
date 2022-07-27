@@ -91,9 +91,11 @@ class Ui_MainWindow(object):
         self.horizontalLayout_7 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_7.setObjectName("horizontalLayout_7")
         self.radioBtn_Pedidos_Ya = QtWidgets.QRadioButton(self.verticalLayoutWidget_2)
+        self.radioBtn_Pedidos_Ya.setEnabled(False)
         self.radioBtn_Pedidos_Ya.setObjectName("radioBtn_Pedidos_Ya")
         self.horizontalLayout_7.addWidget(self.radioBtn_Pedidos_Ya)
         self.radioBtn_Despacho = QtWidgets.QRadioButton(self.verticalLayoutWidget_2)
+        self.radioBtn_Despacho.setEnabled(False)
         self.radioBtn_Despacho.setObjectName("radioBtn_Despacho")
         self.horizontalLayout_7.addWidget(self.radioBtn_Despacho)
         self.verticalLayout.addLayout(self.horizontalLayout_7)
@@ -112,15 +114,12 @@ class Ui_MainWindow(object):
         self.tab_Empnadas = QtWidgets.QWidget()
         self.tab_Empnadas.setObjectName("tab_Empnadas")
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(".\\UI\\../Resources/chicken_quesadilla.png"), QtGui.QIcon.Normal,
-                        QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap(".\\UI\\../Resources/chicken_quesadilla.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.tabWidget.addTab(self.tab_Empnadas, icon1, "")
         self.tab_Agregados = QtWidgets.QWidget()
         self.tab_Agregados.setObjectName("tab_Agregados")
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(
-            QtGui.QPixmap(".\\UI\\../Resources/bbq-ribs-clipart-17336204-an-image-of-barbecue-spare-ribs.png"),
-            QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2.addPixmap(QtGui.QPixmap(".\\UI\\../Resources/bbq-ribs-clipart-17336204-an-image-of-barbecue-spare-ribs.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.tabWidget.addTab(self.tab_Agregados, icon2, "")
         self.tab_Bebidas = QtWidgets.QWidget()
         self.tab_Bebidas.setObjectName("tab_Bebidas")
@@ -132,11 +131,8 @@ class Ui_MainWindow(object):
         icon4 = QtGui.QIcon()
         icon4.addPixmap(QtGui.QPixmap(".\\UI\\../Resources/estrella.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.tabWidget.addTab(self.tab_Promociones, icon4, "")
-        self.pushButton_Editar = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton_Editar.setGeometry(QtCore.QRect(950, 740, 75, 23))
-        self.pushButton_Editar.setObjectName("pushButton_Editar")
         self.pushButton_Pagar = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton_Pagar.setGeometry(QtCore.QRect(1080, 740, 75, 23))
+        self.pushButton_Pagar.setGeometry(QtCore.QRect(1080, 732, 81, 31))
         self.pushButton_Pagar.setObjectName("pushButton_Pagar")
         self.label = QtWidgets.QLabel(self.centralwidget)
         self.label.setGeometry(QtCore.QRect(0, 0, 1600, 1200))
@@ -153,7 +149,6 @@ class Ui_MainWindow(object):
         self.label.raise_()
         self.groupBox.raise_()
         self.tabWidget.raise_()
-        self.pushButton_Editar.raise_()
         self.pushButton_Pagar.raise_()
         self.groupBox_2.raise_()
         MainWindow.setCentralWidget(self.centralwidget)
@@ -162,6 +157,10 @@ class Ui_MainWindow(object):
         self.menubar.setObjectName("menubar")
         self.menuAdministrar_Sesion = QtWidgets.QMenu(self.menubar)
         self.menuAdministrar_Sesion.setObjectName("menuAdministrar_Sesion")
+        self.menuAdministrar_usuarios = QtWidgets.QMenu(self.menubar)
+        self.menuAdministrar_usuarios.setObjectName("menuAdministrar_usuarios")
+        self.menuEditar = QtWidgets.QMenu(self.menubar)
+        self.menuEditar.setObjectName("menuEditar")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -172,11 +171,37 @@ class Ui_MainWindow(object):
         self.actionCerrar_caja.setObjectName("actionCerrar_caja")
         self.actionCerrar_sesion = QtWidgets.QAction(MainWindow)
         self.actionCerrar_sesion.setObjectName("actionCerrar_sesion")
+        self.actionAdministrar_usuarios = QtWidgets.QAction(MainWindow)
+        self.actionAdministrar_usuarios.setObjectName("actionAdministrar_usuarios")
+        self.actionCrear_usuario = QtWidgets.QAction(MainWindow)
+        self.actionCrear_usuario.setObjectName("actionCrear_usuario")
+        self.actionModificar_usuario = QtWidgets.QAction(MainWindow)
+        self.actionModificar_usuario.setObjectName("actionModificar_usuario")
+        self.actionEliminar_usuario = QtWidgets.QAction(MainWindow)
+        self.actionEliminar_usuario.setObjectName("actionEliminar_usuario")
+        self.actionEditar_productos = QtWidgets.QAction(MainWindow)
+        self.actionEditar_productos.setObjectName("actionEditar_productos")
+        self.actionEditar_promociones = QtWidgets.QAction(MainWindow)
+        self.actionEditar_promociones.setObjectName("actionEditar_promociones")
+        self.actionAbrir_caja = QtWidgets.QAction(MainWindow)
+        self.actionAbrir_caja.setObjectName("actionAbrir_caja")
         self.menuAdministrar_Sesion.addAction(self.actionIniciar_Sesion)
         self.menuAdministrar_Sesion.addAction(self.actionCerrar_sesion)
+        self.menuAdministrar_Sesion.addSeparator()
+        self.menuAdministrar_Sesion.addAction(self.actionAbrir_caja)
         self.menuAdministrar_Sesion.addAction(self.actionCerrar_caja)
+        self.menuAdministrar_usuarios.addAction(self.actionCrear_usuario)
+        self.menuAdministrar_usuarios.addAction(self.actionModificar_usuario)
+        self.menuAdministrar_usuarios.addAction(self.actionEliminar_usuario)
+        self.menuEditar.addAction(self.actionEditar_productos)
+        self.menuEditar.addAction(self.actionEditar_promociones)
         self.menubar.addAction(self.menuAdministrar_Sesion.menuAction())
+        self.menubar.addAction(self.menuAdministrar_usuarios.menuAction())
+        self.menubar.addAction(self.menuEditar.menuAction())
+
         self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
         self.actionIniciar_Sesion.triggered.connect(self.inicio_sesion)
         self.radioBtn_Despacho.clicked.connect(self.on_click_Despacho_RButton)
         self.radioBtn_Pedidos_Ya.clicked.connect(self.on_click_PedidosYa_RButton)
@@ -184,17 +209,13 @@ class Ui_MainWindow(object):
         self.radioBtn_ClearSelection.setVisible(False)
         self.radioBtn_ClearSelection.setObjectName("radioBtn_ClearSelection")
         self.radioBtn_ClearSelection.setText("")
-
         self.tabWidget.setCurrentIndex(0)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
         self.is_despacho = False
         self.is_pedidos_ya = False
         if user_name is None or user_name == "":
             self.configure_enabling()
         else:
             self.actionIniciar_Sesion.setEnabled(False)
-            if not self.is_admin:
-                self.pushButton_Editar.setEnabled(False)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -216,13 +237,21 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_Agregados), _translate("MainWindow", "Agregados"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_Bebidas), _translate("MainWindow", "Bebidas"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_Promociones), _translate("MainWindow", "Promociones"))
-        self.pushButton_Editar.setText(_translate("MainWindow", "Editar"))
         self.pushButton_Pagar.setText(_translate("MainWindow", "Pagar"))
         self.groupBox_2.setTitle(_translate("MainWindow", "Venta"))
         self.menuAdministrar_Sesion.setTitle(_translate("MainWindow", "Administrar Sesión"))
-        self.actionIniciar_Sesion.setText(_translate("MainWindow", "Iniciar esión"))
+        self.menuAdministrar_usuarios.setTitle(_translate("MainWindow", "Administrar usuarios"))
+        self.menuEditar.setTitle(_translate("MainWindow", "Editar"))
+        self.actionIniciar_Sesion.setText(_translate("MainWindow", "Iniciar sesión"))
         self.actionCerrar_caja.setText(_translate("MainWindow", "Cerrar caja"))
         self.actionCerrar_sesion.setText(_translate("MainWindow", "Cerrar sesión"))
+        self.actionAdministrar_usuarios.setText(_translate("MainWindow", "Administrar usuarios"))
+        self.actionCrear_usuario.setText(_translate("MainWindow", "Crear usuario"))
+        self.actionModificar_usuario.setText(_translate("MainWindow", "Modificar usuario"))
+        self.actionEliminar_usuario.setText(_translate("MainWindow", "Eliminar usuario"))
+        self.actionEditar_productos.setText(_translate("MainWindow", "Editar productos"))
+        self.actionEditar_promociones.setText(_translate("MainWindow", "Editar promociones"))
+        self.actionAbrir_caja.setText(_translate("MainWindow", "Abrir caja"))
 
     def block_unblock_all(self, operation):
         self.centralwidget.setEnabled(operation)
@@ -266,18 +295,21 @@ class Ui_MainWindow(object):
         self.actionIniciar_Sesion.setEnabled(operation)
         self.actionCerrar_caja.setEnabled(operation)
         self.actionCerrar_sesion.setEnabled(operation)
+        self.menuAdministrar_usuarios.setEnabled(operation)
+        self.menuEditar.setEnabled(operation)
 
     def configure_enabling(self):
         if self.user_name is None or self.user_name == "":
             self.block_unblock_all(False)
-            self.menuAdministrar_Sesion.setEnabled(True)
             self.menubar.setEnabled(True)
+            self.menuAdministrar_Sesion.setEnabled(True)
             self.actionIniciar_Sesion.setEnabled(True)
         else:
             self.block_unblock_all(True)
             self.actionIniciar_Sesion.setEnabled(False)
-        if self.is_admin is False:
-            self.pushButton_Editar.setEnabled(False)
+            if self.is_admin is False:
+                self.menuEditar.setEnabled(False)
+                self.menuAdministrar_usuarios.setEnabled(False)
 
     def inicio_sesion(self):
         if self.user_name is None or self.user_name == "":
@@ -341,3 +373,5 @@ class Window(QMainWindow, Ui_inicio_session):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
+
+

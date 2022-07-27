@@ -247,26 +247,13 @@
      </attribute>
     </widget>
    </widget>
-   <widget class="QPushButton" name="pushButton_Editar">
-    <property name="geometry">
-     <rect>
-      <x>950</x>
-      <y>740</y>
-      <width>75</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Editar</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="pushButton_Pagar">
     <property name="geometry">
      <rect>
       <x>1080</x>
-      <y>740</y>
-      <width>75</width>
-      <height>23</height>
+      <y>732</y>
+      <width>81</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
@@ -318,7 +305,6 @@
    <zorder>label</zorder>
    <zorder>groupBox</zorder>
    <zorder>tabWidget</zorder>
-   <zorder>pushButton_Editar</zorder>
    <zorder>pushButton_Pagar</zorder>
    <zorder>groupBox_2</zorder>
   </widget>
@@ -337,14 +323,33 @@
     </property>
     <addaction name="actionIniciar_Sesion"/>
     <addaction name="actionCerrar_sesion"/>
+    <addaction name="separator"/>
+    <addaction name="actionAbrir_caja"/>
     <addaction name="actionCerrar_caja"/>
    </widget>
+   <widget class="QMenu" name="menuAdministrar_usuarios">
+    <property name="title">
+     <string>Administrar usuarios</string>
+    </property>
+    <addaction name="actionCrear_usuario"/>
+    <addaction name="actionModificar_usuario"/>
+    <addaction name="actionEliminar_usuario"/>
+   </widget>
+   <widget class="QMenu" name="menuEditar">
+    <property name="title">
+     <string>Editar</string>
+    </property>
+    <addaction name="actionEditar_productos"/>
+    <addaction name="actionEditar_promociones"/>
+   </widget>
    <addaction name="menuAdministrar_Sesion"/>
+   <addaction name="menuAdministrar_usuarios"/>
+   <addaction name="menuEditar"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionIniciar_Sesion">
    <property name="text">
-    <string>Iniciar esión</string>
+    <string>Iniciar sesión</string>
    </property>
   </action>
   <action name="actionCerrar_caja">
@@ -355,6 +360,41 @@
   <action name="actionCerrar_sesion">
    <property name="text">
     <string>Cerrar sesión</string>
+   </property>
+  </action>
+  <action name="actionAdministrar_usuarios">
+   <property name="text">
+    <string>Administrar usuarios</string>
+   </property>
+  </action>
+  <action name="actionCrear_usuario">
+   <property name="text">
+    <string>Crear usuario</string>
+   </property>
+  </action>
+  <action name="actionModificar_usuario">
+   <property name="text">
+    <string>Modificar usuario</string>
+   </property>
+  </action>
+  <action name="actionEliminar_usuario">
+   <property name="text">
+    <string>Eliminar usuario</string>
+   </property>
+  </action>
+  <action name="actionEditar_productos">
+   <property name="text">
+    <string>Editar productos</string>
+   </property>
+  </action>
+  <action name="actionEditar_promociones">
+   <property name="text">
+    <string>Editar promociones</string>
+   </property>
+  </action>
+  <action name="actionAbrir_caja">
+   <property name="text">
+    <string>Abrir caja</string>
    </property>
   </action>
  </widget>
