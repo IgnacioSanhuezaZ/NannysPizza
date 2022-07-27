@@ -91,11 +91,9 @@ class Ui_MainWindow(object):
         self.horizontalLayout_7 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_7.setObjectName("horizontalLayout_7")
         self.radioBtn_Pedidos_Ya = QtWidgets.QRadioButton(self.verticalLayoutWidget_2)
-        self.radioBtn_Pedidos_Ya.setEnabled(False)
         self.radioBtn_Pedidos_Ya.setObjectName("radioBtn_Pedidos_Ya")
         self.horizontalLayout_7.addWidget(self.radioBtn_Pedidos_Ya)
         self.radioBtn_Despacho = QtWidgets.QRadioButton(self.verticalLayoutWidget_2)
-        self.radioBtn_Despacho.setEnabled(False)
         self.radioBtn_Despacho.setObjectName("radioBtn_Despacho")
         self.horizontalLayout_7.addWidget(self.radioBtn_Despacho)
         self.verticalLayout.addLayout(self.horizontalLayout_7)
@@ -114,12 +112,15 @@ class Ui_MainWindow(object):
         self.tab_Empnadas = QtWidgets.QWidget()
         self.tab_Empnadas.setObjectName("tab_Empnadas")
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(".\\UI\\../Resources/chicken_quesadilla.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap(".\\UI\\../Resources/chicken_quesadilla.png"), QtGui.QIcon.Normal,
+                        QtGui.QIcon.Off)
         self.tabWidget.addTab(self.tab_Empnadas, icon1, "")
         self.tab_Agregados = QtWidgets.QWidget()
         self.tab_Agregados.setObjectName("tab_Agregados")
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(".\\UI\\../Resources/bbq-ribs-clipart-17336204-an-image-of-barbecue-spare-ribs.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2.addPixmap(
+            QtGui.QPixmap(".\\UI\\../Resources/bbq-ribs-clipart-17336204-an-image-of-barbecue-spare-ribs.png"),
+            QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.tabWidget.addTab(self.tab_Agregados, icon2, "")
         self.tab_Bebidas = QtWidgets.QWidget()
         self.tab_Bebidas.setObjectName("tab_Bebidas")
@@ -177,10 +178,17 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuAdministrar_Sesion.menuAction())
         self.retranslateUi(MainWindow)
         self.actionIniciar_Sesion.triggered.connect(self.inicio_sesion)
+        self.radioBtn_Despacho.clicked.connect(self.on_click_Despacho_RButton)
+        self.radioBtn_Pedidos_Ya.clicked.connect(self.on_click_PedidosYa_RButton)
+        self.radioBtn_ClearSelection = QtWidgets.QRadioButton(self.verticalLayoutWidget_2)
+        self.radioBtn_ClearSelection.setVisible(False)
+        self.radioBtn_ClearSelection.setObjectName("radioBtn_ClearSelection")
+        self.radioBtn_ClearSelection.setText("")
 
         self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-        print(self.user_name, self.is_admin)
+        self.is_despacho = False
+        self.is_pedidos_ya = False
         if user_name is None or user_name == "":
             self.configure_enabling()
         else:
@@ -280,11 +288,52 @@ class Ui_MainWindow(object):
             globals()['access_token'] = dialog.ui.acces_token
             globals()['user_name'] = dialog.ui.user_name
             globals()['is_admin'] = dialog.ui.user_admin
-            print(globals().values())
             self.user_name = globals()['user_name']
             self.is_admin = globals()['is_admin']
-            print(self.user_name, self.is_admin)
             self.configure_enabling()
+
+    def on_click_Despacho_RButton(self):
+        print("despacho", self.is_despacho)
+        if self.is_despacho:
+            if self.radioBtn_Despacho.isChecked():
+                self.is_despacho = False
+                self.radioBtn_Despacho.setChecked(False)
+                self.radioBtn_ClearSelection.setChecked(True)
+            else:
+                self.is_despacho = True
+                self.radioBtn_Despacho.setChecked(True)
+                self.radioBtn_Despacho.setFocus(True)
+        else:
+            self.is_despacho = True
+            self.radioBtn_Despacho.setChecked(True)
+            self.radioBtn_Despacho.setFocus(True)
+        self.radioBtn_Pedidos_Ya.setChecked(False)
+        self.radioBtn_Pedidos_Ya.clearMask()
+        self.is_pedidos_ya = False
+        # self.radioBtn_Despacho.setChecked(self.is_despacho)
+        # self.radioBtn_Despacho.setFocus(self.is_despacho)
+        print(self.is_despacho)
+
+    def on_click_PedidosYa_RButton(self):
+        print("pedidos ya", self.is_pedidos_ya)
+        if self.is_pedidos_ya:
+            if self.radioBtn_Pedidos_Ya.isChecked():
+                self.is_pedidos_ya = False
+                self.radioBtn_Pedidos_Ya.setChecked(False)
+                self.radioBtn_ClearSelection.setChecked(True)
+            else:
+                self.is_pedidos_ya = True
+                self.radioBtn_Pedidos_Ya.setChecked(True)
+                self.radioBtn_Pedidos_Ya.setFocus(True)
+        else:
+            self.is_pedidos_ya = True
+            self.radioBtn_Pedidos_Ya.setChecked(True)
+            self.radioBtn_Pedidos_Ya.setFocus(True)
+        self.radioBtn_Despacho.setChecked(False)
+        self.is_despacho = False
+        self.radioBtn_Despacho.clearMask()
+        # self.radioBtn_Pedidos_Ya.setFocus(self.is_pedidos_ya)
+        print(self.is_pedidos_ya)
 
 
 class Window(QMainWindow, Ui_inicio_session):

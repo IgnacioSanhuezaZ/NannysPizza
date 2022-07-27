@@ -41,7 +41,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         globals()['user_name'] = "test"
         globals()['is_admin'] = False
         self.loginForm()
-        self.setupUi(self, user_name=globals()['user_name'], is_admin=globals()['is_admin'])
+        # self.setupUi(self, user_name=globals()['user_name'], is_admin=globals()['is_admin'])
         self.connectSignalsSlots()
 
     def connectSignalsSlots(self):
@@ -75,9 +75,13 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     ui = MainWindow()
     MainWindow = QtWidgets.QMainWindow()
+    if globals()['access_token'] is False:
+        print(globals()['user_name'], globals()['is_admin'], "En el MainWindow")
+        app.exit(returnCode=1)
+        sys.exit()
     ui.setupUi(MainWindow, globals()['user_name'], globals()['is_admin'])
     MainWindow.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
     # app = QApplication(sys.argv)
     # win = MainWindow()
