@@ -1,4 +1,8 @@
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QMainWindow, QDialog
 from Database import DatabaseModule as db
+from escpos import *
+import json
 
 """---------------------------------------------------------------------------------
                         Sección de control de acceso y gestión
@@ -27,3 +31,35 @@ def Ingreso_cuenta(args):
     else:
         db.insertUser(args, cursor)
         cursor.close()
+
+
+def Iniciar_botones_prod(tab_parents: dict):
+    def on_click(name: str):
+        pass
+
+    cursor = db.get_db()
+    data = db.selectProducto("", cursor)
+    to_load = open(r"C:\Users\ignac\PycharmProjects\NannysPizza\Controller\scheme.json")
+    scheme = json.load(to_load)  # type: dict
+    for key in scheme:
+        scheme[key] = []
+    for e in data:
+        if e['Categoria'] not in scheme:
+            scheme[e['Categoria']] = []
+            with open("scheme.json", "w") as write_file:
+                json.dump(scheme, write_file)
+        scheme[e['Categoria']].append(e)
+        tab = tab_parents[e['Categoria']]  # type: QtWidgets.QGridLayout
+        button = QtWidgets.QPushButton(tab)
+        button.setText(e["Nombre_producto"])
+        button.clicked.connect(lambda: on_click(e["Nombre_producto"]))
+        tab.addWidget(button)
+
+    return scheme
+
+
+def get_Categorias():
+    to_load = open(r"C:\Users\ignac\PycharmProjects\NannysPizza\Controller\scheme.json")
+    scheme = json.load(to_load)  # type: dict
+    print(scheme)
+    return scheme

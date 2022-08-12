@@ -43,7 +43,7 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
+       <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,2">
         <item>
          <widget class="QLabel" name="label_2">
           <property name="text">
@@ -52,12 +52,19 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_Nombre"/>
+         <widget class="QComboBox" name="comboBox_Nombre">
+          <property name="editable">
+           <bool>true</bool>
+          </property>
+          <property name="maxVisibleItems">
+           <number>30</number>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,2">
         <item>
          <widget class="QLabel" name="label_3">
           <property name="text">
@@ -71,7 +78,7 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,2">
         <item>
          <widget class="QLabel" name="label_4">
           <property name="text">
@@ -209,6 +216,17 @@
      <attribute name="title">
       <string>Pizzas</string>
      </attribute>
+     <widget class="QWidget" name="gridLayoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>751</width>
+        <height>431</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_Pizzas"/>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_Empnadas">
      <attribute name="icon">
@@ -218,6 +236,17 @@
      <attribute name="title">
       <string>Empanadas</string>
      </attribute>
+     <widget class="QWidget" name="gridLayoutWidget_2">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>751</width>
+        <height>431</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_Empanadas"/>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_Agregados">
      <attribute name="icon">
@@ -227,6 +256,17 @@
      <attribute name="title">
       <string>Agregados</string>
      </attribute>
+     <widget class="QWidget" name="gridLayoutWidget_3">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>751</width>
+        <height>431</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_Agregados"/>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_Bebidas">
      <attribute name="icon">
@@ -236,6 +276,17 @@
      <attribute name="title">
       <string>Bebidas</string>
      </attribute>
+     <widget class="QWidget" name="gridLayoutWidget_4">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>751</width>
+        <height>431</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_Bebidas"/>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_Promociones">
      <attribute name="icon">
@@ -245,6 +296,17 @@
      <attribute name="title">
       <string>Promociones</string>
      </attribute>
+     <widget class="QWidget" name="gridLayoutWidget_5">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>751</width>
+        <height>431</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_Promociones"/>
+     </widget>
     </widget>
    </widget>
    <widget class="QPushButton" name="pushButton_Pagar">
@@ -297,8 +359,14 @@
        <height>661</height>
       </rect>
      </property>
+     <property name="mouseTracking">
+      <bool>true</bool>
+     </property>
      <property name="contextMenuPolicy">
       <enum>Qt::ActionsContextMenu</enum>
+     </property>
+     <property name="selectionBehavior">
+      <enum>QAbstractItemView::SelectItems</enum>
      </property>
     </widget>
    </widget>

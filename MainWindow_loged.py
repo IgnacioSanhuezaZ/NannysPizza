@@ -11,6 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMainWindow, QDialog
 
 from inicio_session_dialogo import Ui_inicio_session
+from Controller import ControlModule
 
 
 class Ui_MainWindow(object):
@@ -37,9 +38,12 @@ class Ui_MainWindow(object):
         self.label_2 = QtWidgets.QLabel(self.verticalLayoutWidget)
         self.label_2.setObjectName("label_2")
         self.horizontalLayout.addWidget(self.label_2)
-        self.lineEdit_Nombre = QtWidgets.QLineEdit(self.verticalLayoutWidget)
-        self.lineEdit_Nombre.setObjectName("lineEdit_Nombre")
-        self.horizontalLayout.addWidget(self.lineEdit_Nombre)
+        self.comboBox_Nombre = QtWidgets.QComboBox(self.verticalLayoutWidget)
+        self.comboBox_Nombre.setEditable(True)
+        self.comboBox_Nombre.setMaxVisibleItems(30)
+        self.comboBox_Nombre.setObjectName("comboBox_Nombre")
+        self.horizontalLayout.addWidget(self.comboBox_Nombre)
+        self.horizontalLayout.setStretch(1, 2)
         self.verticalLayout_2.addLayout(self.horizontalLayout)
         self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
@@ -49,6 +53,7 @@ class Ui_MainWindow(object):
         self.lineEdit_Direcion = QtWidgets.QLineEdit(self.verticalLayoutWidget)
         self.lineEdit_Direcion.setObjectName("lineEdit_Direcion")
         self.horizontalLayout_3.addWidget(self.lineEdit_Direcion)
+        self.horizontalLayout_3.setStretch(1, 2)
         self.verticalLayout_2.addLayout(self.horizontalLayout_3)
         self.horizontalLayout_4 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
@@ -58,6 +63,7 @@ class Ui_MainWindow(object):
         self.lineEdit_Telefono = QtWidgets.QLineEdit(self.verticalLayoutWidget)
         self.lineEdit_Telefono.setObjectName("lineEdit_Telefono")
         self.horizontalLayout_4.addWidget(self.lineEdit_Telefono)
+        self.horizontalLayout_4.setStretch(1, 2)
         self.verticalLayout_2.addLayout(self.horizontalLayout_4)
         self.verticalLayoutWidget_2 = QtWidgets.QWidget(self.groupBox)
         self.verticalLayoutWidget_2.setGeometry(QtCore.QRect(580, 20, 180, 141))
@@ -108,26 +114,59 @@ class Ui_MainWindow(object):
         self.tab_Pizzas.setEnabled(False)
         self.tab_Pizzas.setAutoFillBackground(False)
         self.tab_Pizzas.setObjectName("tab_Pizzas")
+        self.gridLayoutWidget = QtWidgets.QWidget(self.tab_Pizzas)
+        self.gridLayoutWidget.setGeometry(QtCore.QRect(0, 0, 751, 431))
+        self.gridLayoutWidget.setObjectName("gridLayoutWidget_Pizzas")
+        self.gridLayout_Pizzas = QtWidgets.QGridLayout(self.gridLayoutWidget)
+        self.gridLayout_Pizzas.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout_Pizzas.setObjectName("gridLayout_Pizzas")
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(".\\UI\\../Resources/pizza_PNG7143.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.tabWidget.addTab(self.tab_Pizzas, icon, "")
         self.tab_Empnadas = QtWidgets.QWidget()
         self.tab_Empnadas.setObjectName("tab_Empnadas")
+        self.gridLayoutWidget_2 = QtWidgets.QWidget(self.tab_Empnadas)
+        self.gridLayoutWidget_2.setGeometry(QtCore.QRect(0, 0, 751, 431))
+        self.gridLayoutWidget_2.setObjectName("gridLayoutWidget_Empanadas")
+        self.gridLayout_Empanadas = QtWidgets.QGridLayout(self.gridLayoutWidget_2)
+        self.gridLayout_Empanadas.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout_Empanadas.setObjectName("gridLayout_Empanadas")
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(".\\UI\\../Resources/chicken_quesadilla.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap(".\\UI\\../Resources/chicken_quesadilla.png"), QtGui.QIcon.Normal,
+                        QtGui.QIcon.Off)
         self.tabWidget.addTab(self.tab_Empnadas, icon1, "")
         self.tab_Agregados = QtWidgets.QWidget()
         self.tab_Agregados.setObjectName("tab_Agregados")
+        self.gridLayoutWidget_3 = QtWidgets.QWidget(self.tab_Agregados)
+        self.gridLayoutWidget_3.setGeometry(QtCore.QRect(0, 0, 751, 431))
+        self.gridLayoutWidget_3.setObjectName("gridLayoutWidget_Agregados")
+        self.gridLayout_Agregados = QtWidgets.QGridLayout(self.gridLayoutWidget_3)
+        self.gridLayout_Agregados.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout_Agregados.setObjectName("gridLayout_Agregados")
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(".\\UI\\../Resources/bbq-ribs-clipart-17336204-an-image-of-barbecue-spare-ribs.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2.addPixmap(
+            QtGui.QPixmap(".\\UI\\../Resources/bbq-ribs-clipart-17336204-an-image-of-barbecue-spare-ribs.png"),
+            QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.tabWidget.addTab(self.tab_Agregados, icon2, "")
         self.tab_Bebidas = QtWidgets.QWidget()
         self.tab_Bebidas.setObjectName("tab_Bebidas")
+        self.gridLayoutWidget_4 = QtWidgets.QWidget(self.tab_Bebidas)
+        self.gridLayoutWidget_4.setGeometry(QtCore.QRect(0, 0, 751, 431))
+        self.gridLayoutWidget_4.setObjectName("gridLayoutWidget_Bebidas")
+        self.gridLayout_Bebidas = QtWidgets.QGridLayout(self.gridLayoutWidget_4)
+        self.gridLayout_Bebidas.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout_Bebidas.setObjectName("gridLayout_Bebidas")
         icon3 = QtGui.QIcon()
         icon3.addPixmap(QtGui.QPixmap(".\\UI\\../Resources/3-bebidas.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.tabWidget.addTab(self.tab_Bebidas, icon3, "")
         self.tab_Promociones = QtWidgets.QWidget()
         self.tab_Promociones.setObjectName("tab_Promociones")
+        self.gridLayoutWidget_5 = QtWidgets.QWidget(self.tab_Promociones)
+        self.gridLayoutWidget_5.setGeometry(QtCore.QRect(0, 0, 751, 431))
+        self.gridLayoutWidget_5.setObjectName("gridLayoutWidget_Promociones")
+        self.gridLayout_Promociones = QtWidgets.QGridLayout(self.gridLayoutWidget_5)
+        self.gridLayout_Promociones.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout_Promociones.setObjectName("gridLayout_Promociones")
         icon4 = QtGui.QIcon()
         icon4.addPixmap(QtGui.QPixmap(".\\UI\\../Resources/estrella.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.tabWidget.addTab(self.tab_Promociones, icon4, "")
@@ -144,7 +183,9 @@ class Ui_MainWindow(object):
         self.groupBox_2.setObjectName("groupBox_2")
         self.treeView_Venta = QtWidgets.QTreeView(self.groupBox_2)
         self.treeView_Venta.setGeometry(QtCore.QRect(10, 20, 371, 661))
+        self.treeView_Venta.setMouseTracking(True)
         self.treeView_Venta.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
+        self.treeView_Venta.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectItems)
         self.treeView_Venta.setObjectName("treeView_Venta")
         self.label.raise_()
         self.groupBox.raise_()
@@ -200,6 +241,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuEditar.menuAction())
 
         self.retranslateUi(MainWindow)
+        self.tabWidget.setCurrentIndex(4)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
         self.actionIniciar_Sesion.triggered.connect(self.inicio_sesion)
@@ -209,6 +251,7 @@ class Ui_MainWindow(object):
         self.radioBtn_ClearSelection.setVisible(False)
         self.radioBtn_ClearSelection.setObjectName("radioBtn_ClearSelection")
         self.radioBtn_ClearSelection.setText("")
+        self.load_buttons()
         self.tabWidget.setCurrentIndex(0)
         self.is_despacho = False
         self.is_pedidos_ya = False
@@ -260,7 +303,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.setEnabled(operation)
         self.horizontalLayout.setEnabled(operation)
         self.label_2.setEnabled(operation)
-        self.lineEdit_Nombre.setEnabled(operation)
+        self.comboBox_Nombre.setEnabled(operation)
         self.horizontalLayout_3.setEnabled(operation)
         self.label_3.setEnabled(operation)
         self.lineEdit_Direcion.setEnabled(operation)
@@ -284,7 +327,6 @@ class Ui_MainWindow(object):
         self.tab_Agregados.setEnabled(operation)
         self.tab_Bebidas.setEnabled(operation)
         self.tab_Promociones.setEnabled(operation)
-        self.pushButton_Editar.setEnabled(operation)
         self.pushButton_Pagar.setEnabled(operation)
         self.label.setEnabled(operation)
         self.groupBox_2.setEnabled(operation)
@@ -367,11 +409,29 @@ class Ui_MainWindow(object):
         # self.radioBtn_Pedidos_Ya.setFocus(self.is_pedidos_ya)
         print(self.is_pedidos_ya)
 
+    def load_buttons(self):
+        """
+        """
+        tab_parents = {}
+        categorias = ControlModule.get_Categorias()
+        for key in categorias.keys():
+            tab_grid = self.tabWidget.findChild(type(self.tab_Pizzas), "tab_" + key)
+            print(tab_grid)
+            tab_grid = tab_grid.findChild(
+                type(self.gridLayoutWidget), "gridLayoutWidget_" + key)
+            print(tab_grid)
+            tab_grid = tab_grid.findChild(
+                QtWidgets.QGridLayout,
+                "gridLayout_" + key
+            )   # type: QtWidgets.QGridLayout
+            tab_parents[key] = tab_grid
+        scheme = ControlModule.Iniciar_botones_prod(tab_parents)  # type: dict
+
+
+
 
 class Window(QMainWindow, Ui_inicio_session):
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
-
-

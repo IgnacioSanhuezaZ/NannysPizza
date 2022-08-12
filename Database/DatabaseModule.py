@@ -107,7 +107,7 @@ def selectBoletas(args, cursor, values=None):
 
 def selectProducto(args, cursor, values=None):
     """
-    Keys: Nombre_producto, Precio, Categoria, Sub_categoria
+    Keys: Nombre_producto, Precio_unitario, Categoria, Sub_categoria, Precio_mediana, Precio_familiar
     :param args:
     :param cursor:
     :param values:
@@ -218,7 +218,7 @@ def GetBoletas(boleta_key):
 
 
 def GetProduct(product_key):
-    """Keys: Nombre_producto, Precio, Categoria, Sub_categoria"""
+    """Keys: Nombre_producto, Precio_unitario, Categoria, Sub_categoria, Precio_mediana, Precio_familiar"""
     cursor = get_db()
     record = selectProducto("WHERE Nombre_producto = ?;", cursor, (product_key,))
     cursor.close()
@@ -331,8 +331,9 @@ def insertBoleta(values, cursor):
 
 
 def insertProduct(values, cursor):
-    """Keys: Nombre_producto, Precio, Categoria, Sub_categoria"""
-    query = """INSERT INTO Producto (Nombre_producto, Precio, Categoria) VALUES (?, ?, ?, ?);"""
+    """Keys: Nombre_producto, Precio_unitario, Categoria, Sub_categoria, Precio_mediana, Precio_familiar"""
+    query = """INSERT INTO Producto (Nombre_producto, Precio_unitario, Categoria, Sub_categoria,\
+ Precio_mediana, Precio_familiar) VALUES (?, ?, ?, ?, ?, ?);"""
     try:
         cursor.execute(query, tuple(values))
         cursor.commit()
@@ -461,20 +462,23 @@ def updateBoleta(cursor, values):
 
 def updateProducto(cursor, values):
     """
-    Keys: Nombre_producto, Precio, Categoria, Sub_categoria
+    Keys: Nombre_producto, Precio_unitario, Categoria, Sub_categoria, Precio_mediana, Precio_familiar
 
     :param cursor: sqlite3 database cursor
-    :param values: tuple(Nombre_producto, Precio, Categoria, Sub_categoria, Nombre_producto)
+    :param values: tuple(Nombre_producto, Precio_unitario, Categoria, Sub_categoria, Precio_mediana, Precio_familiar,
+                         Nombre_producto)
     :return: None
     """
     query = """UPDATE Producto 
                 SET Nombre_producto = ? ,
-                    Precio = ?,
+                    Precio_unitario = ?,
                     Categoria = ?,
-                    Sub_categoria = ?
+                    Sub_categoria = ?,
+                    Precio_mediana = ?,
+                    Precio_familiar = ?
                 WHERE Nombre_producto = ?;"""
     try:
-        if len(values) != 5:
+        if len(values) != 7:
             print("Wrong amount of parameters!")
             raise sqlite3.Error
         else:
