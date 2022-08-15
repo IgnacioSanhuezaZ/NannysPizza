@@ -46,7 +46,7 @@ def Iniciar_botones_prod(tab_parents: dict):
     for e in data:
         if e['Categoria'] not in scheme:
             scheme[e['Categoria']] = []
-            with open("scheme.json", "w") as write_file:
+            with open(r"C:\Users\ignac\PycharmProjects\NannysPizza\Controller\scheme.json", "w") as write_file:
                 json.dump(scheme, write_file)
         scheme[e['Categoria']].append(e)
         tab = tab_parents[e['Categoria']]  # type: QtWidgets.QGridLayout
@@ -58,8 +58,5 @@ def Iniciar_botones_prod(tab_parents: dict):
     return scheme
 
 
-def get_Categorias():
-    to_load = open(r"C:\Users\ignac\PycharmProjects\NannysPizza\Controller\scheme.json")
-    scheme = json.load(to_load)  # type: dict
-    print(scheme)
-    return scheme
+def get_Productos():
+    return db.GetAllProducts()

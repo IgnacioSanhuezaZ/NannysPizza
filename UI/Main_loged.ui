@@ -185,6 +185,9 @@
     </widget>
    </widget>
    <widget class="QTabWidget" name="tabWidget">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>30</x>
@@ -204,7 +207,7 @@
     </property>
     <widget class="QWidget" name="tab_Pizzas">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="autoFillBackground">
       <bool>false</bool>
@@ -216,16 +219,60 @@
      <attribute name="title">
       <string>Pizzas</string>
      </attribute>
-     <widget class="QWidget" name="gridLayoutWidget">
+     <widget class="QListView" name="listPizzas">
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>0</y>
+        <y>20</y>
         <width>751</width>
-        <height>431</height>
+        <height>411</height>
        </rect>
       </property>
-      <layout class="QGridLayout" name="gridLayout_Pizzas"/>
+      <property name="uniformItemSizes">
+       <bool>true</bool>
+      </property>
+      <property name="itemAlignment">
+       <set>Qt::AlignLeading</set>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="radioButton_individual">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>0</y>
+        <width>82</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Individual</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="radioButton_Mediana">
+      <property name="geometry">
+       <rect>
+        <x>110</x>
+        <y>0</y>
+        <width>82</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Mediana</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="radioButton_Familiar">
+      <property name="geometry">
+       <rect>
+        <x>210</x>
+        <y>0</y>
+        <width>82</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Familiar</string>
+      </property>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_Empnadas">
@@ -236,16 +283,15 @@
      <attribute name="title">
       <string>Empanadas</string>
      </attribute>
-     <widget class="QWidget" name="gridLayoutWidget_2">
+     <widget class="QListView" name="listEmpanadas">
       <property name="geometry">
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>751</width>
+        <width>761</width>
         <height>431</height>
        </rect>
       </property>
-      <layout class="QGridLayout" name="gridLayout_Empanadas"/>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_Agregados">
@@ -256,16 +302,15 @@
      <attribute name="title">
       <string>Agregados</string>
      </attribute>
-     <widget class="QWidget" name="gridLayoutWidget_3">
+     <widget class="QListView" name="listAgregados">
       <property name="geometry">
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>751</width>
+        <width>761</width>
         <height>431</height>
        </rect>
       </property>
-      <layout class="QGridLayout" name="gridLayout_Agregados"/>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_Bebidas">
@@ -276,16 +321,15 @@
      <attribute name="title">
       <string>Bebidas</string>
      </attribute>
-     <widget class="QWidget" name="gridLayoutWidget_4">
+     <widget class="QListView" name="listBebidas">
       <property name="geometry">
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>751</width>
+        <width>761</width>
         <height>431</height>
        </rect>
       </property>
-      <layout class="QGridLayout" name="gridLayout_Bebidas"/>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_Promociones">
@@ -296,16 +340,15 @@
      <attribute name="title">
       <string>Promociones</string>
      </attribute>
-     <widget class="QWidget" name="gridLayoutWidget_5">
+     <widget class="QListView" name="listPromociones">
       <property name="geometry">
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>751</width>
+        <width>761</width>
         <height>431</height>
        </rect>
       </property>
-      <layout class="QGridLayout" name="gridLayout_Promociones"/>
      </widget>
     </widget>
    </widget>

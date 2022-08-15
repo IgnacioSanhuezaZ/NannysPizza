@@ -58,7 +58,7 @@ def selectUser(args, cursor, values=None):
         else:
             records = list(cursor.execute(sqlite_select_query))
     except sqlite3.Error as error:
-        print("Failed to get data into sqlite table", error)
+        print("Failed to get data from sqlite table", error)
         records = []
     return records
 
@@ -79,7 +79,7 @@ def selectClient(args, cursor, values=None):
         else:
             records = list(cursor.execute(sqlite_select_query))
     except sqlite3.Error as error:
-        print("Failed to get data into sqlite table", error)
+        print("Failed to get data from sqlite table", error)
         records = []
     return records
 
@@ -100,7 +100,7 @@ def selectBoletas(args, cursor, values=None):
         else:
             records = list(cursor.execute(sqlite_select_query))
     except sqlite3.Error as error:
-        print("Failed to get data into sqlite table", error)
+        print("Failed to get data from sqlite table", error)
         records = []
     return records
 
@@ -121,7 +121,7 @@ def selectProducto(args, cursor, values=None):
         else:
             records = list(cursor.execute(sqlite_select_query))
     except sqlite3.Error as error:
-        print("Failed to get data into sqlite table", error)
+        print("Failed to get data from sqlite table", error)
         records = []
     return records
 
@@ -142,7 +142,7 @@ def selectSesion(args, cursor, values=None):
         else:
             records = list(cursor.execute(sqlite_select_query))
     except sqlite3.Error as error:
-        print("Failed to get data into sqlite table", error)
+        print("Failed to get data from sqlite table", error)
         records = []
     return records
 
@@ -163,7 +163,7 @@ def selectTurnos_caja(args, cursor, values=None):
         else:
             records = list(cursor.execute(sqlite_select_query))
     except sqlite3.Error as error:
-        print("Failed to get data into sqlite table", error)
+        print("Failed to get data from sqlite table", error)
         records = []
     return records
 
@@ -178,13 +178,55 @@ def selectVentas(args, cursor, values=None):
     """
     try:
         sqlite_select_query = """SELECT * from Ventas """
+        if args != "" and values:
+            sqlite_select_query += args
+            records = list(cursor.execute(sqlite_select_query, tuple(values)))
+        else:
+            records = list(cursor.execute(sqlite_select_query))
+    except sqlite3.Error as error:
+        print("Failed to get data from sqlite table", error)
+        records = []
+    return records
+
+
+def selectPromociones(args, cursor, values=None):
+    """
+        Keys: Id_promocion, Nombre_promocion, Is_by_sub_cathegory
+        :param args:
+        :param cursor:
+        :param values:
+        :return:
+        """
+    try:
+        sqlite_select_query = """SELECT * from Promociones """
         if args != "":
             sqlite_select_query += args
             records = list(cursor.execute(sqlite_select_query, tuple(values)))
         else:
             records = list(cursor.execute(sqlite_select_query))
     except sqlite3.Error as error:
-        print("Failed to get data into sqlite table", error)
+        print("Failed to get data from sqlite table", error)
+        records = []
+    return records
+
+
+def selectComponentesPromociones(args, cursor, values=None):
+    """
+        Keys: Id_componente, Id_promocion, Is_by_sub_cathegory, Cantidad, Nombre_Producto, Sub_categoria
+        :param args:
+        :param cursor:
+        :param values:
+        :return:
+        """
+    try:
+        sqlite_select_query = """SELECT * from Componentes_promociones """
+        if args != "":
+            sqlite_select_query += args
+            records = list(cursor.execute(sqlite_select_query, tuple(values)))
+        else:
+            records = list(cursor.execute(sqlite_select_query))
+    except sqlite3.Error as error:
+        print("Failed to get data from sqlite table", error)
         records = []
     return records
 
@@ -210,9 +252,9 @@ def GetClient(client):
 
 
 def GetBoletas(boleta_key):
-    """Keys: Id_entrada, Id_boleta, Nombre_producto, Cantidad"""
+    """Keys: Id_entrada, Id_boleta, Nombre_producto, Cantidad, Tamano"""
     cursor = get_db()
-    record = selectBoletas("WHERE Id_entrada = ?;", cursor, (boleta_key,))
+    record = selectBoletas("WHERE Id_boleta = ?;", cursor, (boleta_key,))
     cursor.close()
     return record
 
@@ -221,6 +263,22 @@ def GetProduct(product_key):
     """Keys: Nombre_producto, Precio_unitario, Categoria, Sub_categoria, Precio_mediana, Precio_familiar"""
     cursor = get_db()
     record = selectProducto("WHERE Nombre_producto = ?;", cursor, (product_key,))
+    cursor.close()
+    return record
+
+
+def GetProductByCathegory(product_key):
+    """Keys: Nombre_producto, Precio_unitario, Categoria, Sub_categoria, Precio_mediana, Precio_familiar"""
+    cursor = get_db()
+    record = selectProducto("WHERE Categoria = ?;", cursor, (product_key,))
+    cursor.close()
+    return record
+
+
+def GetAllProducts():
+    """Keys: Nombre_producto, Precio_unitario, Categoria, Sub_categoria, Precio_mediana, Precio_familiar"""
+    cursor = get_db()
+    record = selectProducto("", cursor)
     cursor.close()
     return record
 
@@ -252,7 +310,26 @@ def GetOneTurn(turn_key):
 def GetVentaPerKey(venta_key):
     """Keys: Id_venta, Nombre_usuario, Id_boleta, Nombre_cliente, Direccion_cliente, Id_sesion"""
     cursor = get_db()
-    record = selectVentas("WHERE Id_turno = ? AND Id_sesion = ?;", cursor, (venta_key,))
+    record = selectVentas("WHERE Id_turno = ? AND Id_sesion = ?;", cursor, (venta_key,))  # type: dict
+    for element in record:
+        if 'Id_boleta' in element:
+            id_boleta = element['Id_boleta']
+            boleta = GetBoletas(id_boleta)  # type: dict
+            for componente in boleta:
+                if 'Tamano' in componente:
+                    tamano = componente['Tamano']
+                else:
+                    tamano = 1
+                nombre_producto = componente['Nombre_producto']
+                producto = GetProduct(nombre_producto)[0]
+                if tamano == 1:
+                    precio = producto['Precio_unitario']
+                elif tamano == 2:
+                    precio = producto['Precio_mediana']
+                elif tamano == 3:
+                    precio = producto['Precio_familiar']
+                componente['Precio'] = precio
+            element['Boleta'] = boleta
     cursor.close()
     return record
 
@@ -260,35 +337,53 @@ def GetVentaPerKey(venta_key):
 def GetVentaPerClient(venta_key):
     """Keys: Id_venta, Nombre_usuario, Id_boleta, Nombre_cliente, Direccion_cliente, Id_sesion"""
     cursor = get_db()
-    record = selectVentas("WHERE Direccion_cliente = ?;", cursor, (venta_key,))   # type: dict
+    record = selectVentas("WHERE Nombre_cliente = ? AND Direccion_cliente = ?;", cursor, tuple(venta_key))  # type: dict
+    for element in record:
+        if 'Id_boleta' in element:
+            id_boleta = element['Id_boleta']
+            boleta = GetBoletas(id_boleta)  # type: dict
+            for componente in boleta:
+                if 'Tamano' in componente:
+                    tamano = componente['Tamano']
+                else:
+                    tamano = 1
+                nombre_producto = componente['Nombre_producto']
+                producto = GetProduct(nombre_producto)[0]
+                if tamano == 1:
+                    precio = producto['Precio_unitario']
+                elif tamano == 2:
+                    precio = producto['Precio_mediana']
+                elif tamano == 3:
+                    precio = producto['Precio_familiar']
+                componente['Precio'] = precio
+            element['Boleta'] = boleta
     cursor.close()
-    """
-    if 'Id_boleta' in record:
-        id_boleta = record['Id_boleta']
-        boleta = GetBoletas(id_boleta)   # type: dict
-        del boleta['Id_entrada']
-        del boleta['Id_boleta']
-        del record['Id_boleta']
-        record['Boleta'] = boleta
-    """
     return record
 
 
-
-def GetLastNVentas(venta_key, n):
+def GetLastNVentas(n):
     """Keys: Id_venta, Nombre_usuario, Id_boleta, Nombre_cliente, Direccion_cliente, Id_sesion"""
     cursor = get_db()
-    record = selectVentas("ORDER BY Id_venta DESC;", cursor, (venta_key,))   # type: dict
-    if len(record) > n:
-        record = record[:n]
-    for rec in record:
-        if 'Id_boleta' in rec:
-            id_boleta = rec['Id_boleta']
-            boleta = GetBoletas(id_boleta)   # type: dict
-            del boleta['Id_entrada']
-            del boleta['Id_boleta']
-            del rec['Id_boleta']
-            rec['Boleta'] = boleta
+    record = selectVentas("ORDER BY Id_venta DESC;", cursor)[:n]  # type: dict
+    for element in record:
+        if 'Id_boleta' in element:
+            id_boleta = element['Id_boleta']
+            boleta = GetBoletas(id_boleta)  # type: dict
+            for componente in boleta:
+                if 'Tamano' in componente:
+                    tamano = componente['Tamano']
+                else:
+                    tamano = 1
+                nombre_producto = componente['Nombre_producto']
+                producto = GetProduct(nombre_producto)[0]
+                if tamano == 1:
+                    precio = producto['Precio_unitario']
+                elif tamano == 2:
+                    precio = producto['Precio_mediana']
+                elif tamano == 3:
+                    precio = producto['Precio_familiar']
+                componente['Precio'] = precio
+            element['Boleta'] = boleta
     cursor.close()
     return record
 
