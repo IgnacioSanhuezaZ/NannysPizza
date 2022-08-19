@@ -1,8 +1,14 @@
+# from escpos.connections import getUSBPrinter
+# from escpos.printer import Usb
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QDialog
+# from PyQt5.QtWidgets import QMainWindow, QDialog
+from escpos.printer import Usb, Serial
+
 from Database import DatabaseModule as db
-from escpos import *
+# from escpos.conn import USBConnection as usbcon
+# from escpos.connections import getUSBPrinter
 import json
+# import libusb1
 
 """---------------------------------------------------------------------------------
                         Sección de control de acceso y gestión
@@ -33,30 +39,87 @@ def Ingreso_cuenta(args):
         cursor.close()
 
 
-def Iniciar_botones_prod(tab_parents: dict):
-    def on_click(name: str):
-        pass
+def get_Producto(nombre_producto):
+    return db.GetProduct((nombre_producto,))
 
-    cursor = db.get_db()
-    data = db.selectProducto("", cursor)
-    to_load = open(r"C:\Users\ignac\PycharmProjects\NannysPizza\Controller\scheme.json")
-    scheme = json.load(to_load)  # type: dict
-    for key in scheme:
-        scheme[key] = []
-    for e in data:
-        if e['Categoria'] not in scheme:
-            scheme[e['Categoria']] = []
-            with open(r"C:\Users\ignac\PycharmProjects\NannysPizza\Controller\scheme.json", "w") as write_file:
-                json.dump(scheme, write_file)
-        scheme[e['Categoria']].append(e)
-        tab = tab_parents[e['Categoria']]  # type: QtWidgets.QGridLayout
-        button = QtWidgets.QPushButton(tab)
-        button.setText(e["Nombre_producto"])
-        button.clicked.connect(lambda: on_click(e["Nombre_producto"]))
-        tab.addWidget(button)
 
-    return scheme
+def get_Producto_by_Cathegory(nombre_categoria):
+    print(nombre_categoria)
+    return db.GetProductBySubCathegory((nombre_categoria,))
 
 
 def get_Productos():
     return db.GetAllProducts()
+
+
+def get_Promociones():
+    return db.GetPromociones()
+
+
+def get_Promocion(nombre_promocion):
+    print("in_promo")
+    return db.GetPromocion((nombre_promocion,))
+
+
+def getLastSession():
+    return db.GetLastSesion()
+
+
+def get_Clientes_by_name(nombre_cliente):
+    return db.GetClientPerNameOnly((nombre_cliente,))
+
+
+def get_Cliente(nombre_cliente, direccion):
+    return db.GetClient((nombre_cliente, direccion,))
+
+
+def set_client(data):
+    if len(data) == 4:
+        cursor = db.get_db()
+        db.insertClient(cursor=cursor, values=tuple(data))
+    else:
+        print("wrong values length", len(data))
+
+
+def set_boleta(data_venta, data_boleta):
+    """
+    key order venta: (Nombre_usuario, Nombre_cliente, Direccion_cliente, Id_sesion,)
+
+    key order boleta: (Nombre_producto, Cantidad, Tamano, Nombre_promocion, Cobro_adicional,)
+    :param data_venta:
+    :param data_boleta:
+    :return:
+    """
+    if len(data_venta) == 4:
+        cursor = db.get_db()
+        db.insertVenta(cursor=cursor, values=tuple(data_venta))
+        last = db.GetLastNVentas(1)
+        last_id = None
+        if last:
+            last_id = last[0]['']
+        if last_id:
+            for data in data_boleta:
+                if len(data) == 5:
+                    db.insertBoleta(cursor=cursor, values=tuple([last_id] + data))
+
+
+def print_in_printer(content: str):
+    # p = usbcon(vendor_id=0x0416, product_id=0x5011)
+    # p = printer.Usb(idVendor=0x0416, idProduct=0x5011)
+    p = Usb(idVendor=0x0416, idProduct=0x5011)
+    # p = getUSBPrinter(commandSet='Generic')(idVendor=0x0416, idProduct=0x5011)
+    print(p)
+    print("A punto de ...", p)
+    p.set()
+    p.panel_buttons(enable=True)
+    p.open()
+    p.text("Probando\nLa\Máquina\n.\n.\n.\n")
+    p.print_and_feed()
+    p.beep()
+    p.cut()
+    print(p.idProduct)
+    # p.write("Probando\nLa\Máquina\n.\n.\n.\n")
+    # p.text("Probando\nLa\Máquina\n.\n.\n.\n")
+    # p.catch()
+    # p.write(content)
+    # p.lf()

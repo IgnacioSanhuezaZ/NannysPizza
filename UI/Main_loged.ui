@@ -203,7 +203,7 @@
      <bool>false</bool>
     </property>
     <property name="currentIndex">
-     <number>4</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tab_Pizzas">
      <property name="enabled">
@@ -219,22 +219,6 @@
      <attribute name="title">
       <string>Pizzas</string>
      </attribute>
-     <widget class="QListView" name="listPizzas">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>20</y>
-        <width>751</width>
-        <height>411</height>
-       </rect>
-      </property>
-      <property name="uniformItemSizes">
-       <bool>true</bool>
-      </property>
-      <property name="itemAlignment">
-       <set>Qt::AlignLeading</set>
-      </property>
-     </widget>
      <widget class="QRadioButton" name="radioButton_individual">
       <property name="geometry">
        <rect>
@@ -274,6 +258,16 @@
        <string>Familiar</string>
       </property>
      </widget>
+     <widget class="QListWidget" name="listPizzas">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>20</y>
+        <width>761</width>
+        <height>411</height>
+       </rect>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_Empnadas">
      <attribute name="icon">
@@ -283,7 +277,7 @@
      <attribute name="title">
       <string>Empanadas</string>
      </attribute>
-     <widget class="QListView" name="listEmpanadas">
+     <widget class="QListWidget" name="listEmpanadas">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -302,7 +296,7 @@
      <attribute name="title">
       <string>Agregados</string>
      </attribute>
-     <widget class="QListView" name="listAgregados">
+     <widget class="QListWidget" name="listAgregados">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -321,7 +315,7 @@
      <attribute name="title">
       <string>Bebidas</string>
      </attribute>
-     <widget class="QListView" name="listBebidas">
+     <widget class="QListWidget" name="listBebidas">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -340,11 +334,11 @@
      <attribute name="title">
       <string>Promociones</string>
      </attribute>
-     <widget class="QListView" name="listPromociones">
+     <widget class="QListWidget" name="listPromociones">
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>0</y>
+        <y>-1</y>
         <width>761</width>
         <height>431</height>
        </rect>
@@ -393,23 +387,87 @@
     <property name="title">
      <string>Venta</string>
     </property>
-    <widget class="QTreeView" name="treeView_Venta">
+    <widget class="QTreeWidget" name="treeView_Venta">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>20</y>
        <width>371</width>
-       <height>661</height>
+       <height>631</height>
       </rect>
      </property>
-     <property name="mouseTracking">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="columnCount">
+      <number>3</number>
+     </property>
+     <attribute name="headerMinimumSectionSize">
+      <number>100</number>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>Producto</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Detalle</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Cobros extra</string>
+      </property>
+     </column>
+    </widget>
+    <widget class="QLabel" name="label_5">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>660</y>
+       <width>81</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Total:</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_Total">
+     <property name="geometry">
+      <rect>
+       <x>80</x>
+       <y>660</y>
+       <width>113</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>11</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
+     <property name="text">
+      <string>12.990</string>
+     </property>
+     <property name="readOnly">
       <bool>true</bool>
-     </property>
-     <property name="contextMenuPolicy">
-      <enum>Qt::ActionsContextMenu</enum>
-     </property>
-     <property name="selectionBehavior">
-      <enum>QAbstractItemView::SelectItems</enum>
      </property>
     </widget>
    </widget>
@@ -450,8 +508,25 @@
     <property name="title">
      <string>Editar</string>
     </property>
-    <addaction name="actionEditar_productos"/>
-    <addaction name="actionEditar_promociones"/>
+    <widget class="QMenu" name="menuEditar_productos">
+     <property name="title">
+      <string>Editar productos</string>
+     </property>
+     <addaction name="actionA_adir_un_producto"/>
+     <addaction name="actionSubir_CSV_con_lista_de_productos"/>
+     <addaction name="actionEditar_un_producto"/>
+     <addaction name="actionEliminar_un_producto"/>
+    </widget>
+    <widget class="QMenu" name="menuEditar_promociones">
+     <property name="title">
+      <string>Editar promociones</string>
+     </property>
+     <addaction name="actionAgregar_promoci_n"/>
+     <addaction name="actionEditar_promoci_n"/>
+     <addaction name="actionEliminar_promoci_n"/>
+    </widget>
+    <addaction name="menuEditar_productos"/>
+    <addaction name="menuEditar_promociones"/>
    </widget>
    <addaction name="menuAdministrar_Sesion"/>
    <addaction name="menuAdministrar_usuarios"/>
@@ -493,19 +568,44 @@
     <string>Eliminar usuario</string>
    </property>
   </action>
-  <action name="actionEditar_productos">
-   <property name="text">
-    <string>Editar productos</string>
-   </property>
-  </action>
-  <action name="actionEditar_promociones">
-   <property name="text">
-    <string>Editar promociones</string>
-   </property>
-  </action>
   <action name="actionAbrir_caja">
    <property name="text">
     <string>Abrir caja</string>
+   </property>
+  </action>
+  <action name="actionEditar_un_producto">
+   <property name="text">
+    <string>Editar un producto</string>
+   </property>
+  </action>
+  <action name="actionSubir_CSV_con_lista_de_productos">
+   <property name="text">
+    <string>Subir CSV con lista de productos</string>
+   </property>
+  </action>
+  <action name="actionAgregar_promoci_n">
+   <property name="text">
+    <string>Agregar promoción</string>
+   </property>
+  </action>
+  <action name="actionEditar_promoci_n">
+   <property name="text">
+    <string>Editar promoción</string>
+   </property>
+  </action>
+  <action name="actionEliminar_promoci_n">
+   <property name="text">
+    <string>Eliminar promoción</string>
+   </property>
+  </action>
+  <action name="actionA_adir_un_producto">
+   <property name="text">
+    <string>Añadir un producto</string>
+   </property>
+  </action>
+  <action name="actionEliminar_un_producto">
+   <property name="text">
+    <string>Eliminar un producto</string>
    </property>
   </action>
  </widget>

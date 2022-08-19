@@ -86,7 +86,7 @@ def selectClient(args, cursor, values=None):
 
 def selectBoletas(args, cursor, values=None):
     """
-    Keys: Id_entrada, Id_boleta, Nombre_producto, Cantidad
+    Keys: Id_entrada, Id_boleta, Nombre_producto, Cantidad, Tamano, Nombre_promocion, Cobro_adicional
     :param args:
     :param cursor:
     :param values:
@@ -170,7 +170,7 @@ def selectTurnos_caja(args, cursor, values=None):
 
 def selectVentas(args, cursor, values=None):
     """
-    Keys: Id_venta, Nombre_usuario, Id_boleta, Nombre_cliente, Direccion_cliente, Id_sesion
+    Keys: Id_venta, Nombre_usuario, Nombre_cliente, Direccion_cliente, Id_sesion
     :param args:
     :param cursor:
     :param values:
@@ -191,7 +191,7 @@ def selectVentas(args, cursor, values=None):
 
 def selectPromociones(args, cursor, values=None):
     """
-        Keys: Id_promocion, Nombre_promocion, Is_by_sub_cathegory
+        Keys: Id_promocion, Nombre_promocion, Is_by_sub_cathegory, precio, Tamano
         :param args:
         :param cursor:
         :param values:
@@ -246,13 +246,21 @@ def GetUser(user):
 def GetClient(client):
     """Keys: Nombre_cliente, Direccion, Sector, Telefono"""
     cursor = get_db()
-    record = selectClient("WHERE Nombre_cliente = ? AND Direccion = ?;", cursor, (client,))
+    record = selectClient("WHERE Nombre_cliente = ? AND Direccion = ?;", cursor, tuple(client))
+    cursor.close()
+    return record
+
+
+def GetClientPerNameOnly(client):
+    """Keys: Nombre_cliente, Direccion, Sector, Telefono"""
+    cursor = get_db()
+    record = selectClient("WHERE Nombre_cliente = ?;", cursor, tuple(client))
     cursor.close()
     return record
 
 
 def GetBoletas(boleta_key):
-    """Keys: Id_entrada, Id_boleta, Nombre_producto, Cantidad, Tamano"""
+    """Keys: Id_entrada, Id_boleta, Nombre_producto, Cantidad, Tamano, Nombre_promocion, Cobro_adicional"""
     cursor = get_db()
     record = selectBoletas("WHERE Id_boleta = ?;", cursor, (boleta_key,))
     cursor.close()
@@ -262,15 +270,15 @@ def GetBoletas(boleta_key):
 def GetProduct(product_key):
     """Keys: Nombre_producto, Precio_unitario, Categoria, Sub_categoria, Precio_mediana, Precio_familiar"""
     cursor = get_db()
-    record = selectProducto("WHERE Nombre_producto = ?;", cursor, (product_key,))
+    record = selectProducto("WHERE Nombre_producto = ?;", cursor, tuple(product_key,))
     cursor.close()
     return record
 
 
-def GetProductByCathegory(product_key):
+def GetProductBySubCathegory(product_key):
     """Keys: Nombre_producto, Precio_unitario, Categoria, Sub_categoria, Precio_mediana, Precio_familiar"""
     cursor = get_db()
-    record = selectProducto("WHERE Categoria = ?;", cursor, (product_key,))
+    record = selectProducto("WHERE Sub_categoria = ?;", cursor, tuple(product_key))
     cursor.close()
     return record
 
@@ -291,6 +299,14 @@ def GetSesion(sesion_key):
     return record
 
 
+def GetLastSesion():
+    """Keys: Id_sesion, Nombre_usuario, Cerrado, Fecha_apertura, Fecha_cierre, Apertura_caja"""
+    cursor = get_db()
+    record = selectSesion("ORDER BY Fecha_apertura DESC;", cursor)
+    cursor.close()
+    return record[:1]
+
+
 def GetAllTurns(turn_key):
     """Keys: Id_turno, Id_sesion, Nombre_usuario"""
     cursor = get_db()
@@ -308,7 +324,7 @@ def GetOneTurn(turn_key):
 
 
 def GetVentaPerKey(venta_key):
-    """Keys: Id_venta, Nombre_usuario, Id_boleta, Nombre_cliente, Direccion_cliente, Id_sesion"""
+    """Keys: Id_venta, Nombre_usuario, Nombre_cliente, Direccion_cliente, Id_sesion"""
     cursor = get_db()
     record = selectVentas("WHERE Id_turno = ? AND Id_sesion = ?;", cursor, (venta_key,))  # type: dict
     for element in record:
@@ -335,7 +351,7 @@ def GetVentaPerKey(venta_key):
 
 
 def GetVentaPerClient(venta_key):
-    """Keys: Id_venta, Nombre_usuario, Id_boleta, Nombre_cliente, Direccion_cliente, Id_sesion"""
+    """Keys: Id_venta, Nombre_usuario, Nombre_cliente, Direccion_cliente, Id_sesion"""
     cursor = get_db()
     record = selectVentas("WHERE Nombre_cliente = ? AND Direccion_cliente = ?;", cursor, tuple(venta_key))  # type: dict
     for element in record:
@@ -362,7 +378,7 @@ def GetVentaPerClient(venta_key):
 
 
 def GetLastNVentas(n):
-    """Keys: Id_venta, Nombre_usuario, Id_boleta, Nombre_cliente, Direccion_cliente, Id_sesion"""
+    """Keys: Id_venta, Nombre_usuario, Nombre_cliente, Direccion_cliente, Id_sesion"""
     cursor = get_db()
     record = selectVentas("ORDER BY Id_venta DESC;", cursor)[:n]  # type: dict
     for element in record:
@@ -388,6 +404,46 @@ def GetLastNVentas(n):
     return record
 
 
+def GetPromociones():
+    """Keys: Id_promocion, Nombre_promocion, Is_by_sub_cathegory, precio, Tamano"""
+    cursor = get_db()
+    record = selectPromociones("", cursor)  # type: dict
+    for element in record:
+        if 'Id_promocion' in element:
+            id_promocion = element['Id_promocion']
+            print(id_promocion)
+            componentes = selectComponentesPromociones("WHERE Id_promocion = ?", cursor, (id_promocion,))  # type: list
+            for componente in componentes:
+                is_by_sub_cathegory = componente['Is_by_sub_cathegory']
+                if is_by_sub_cathegory is False:
+                    nombre_producto = componente['Nombre_producto']
+                    producto = GetProduct(nombre_producto)[0]
+                    componente['Producto'] = producto
+            element['Componentes'] = componentes
+    cursor.close()
+    return record
+
+
+def GetPromocion(nombre_promocion):
+    """Keys: Id_promocion, Nombre_promocion, Is_by_sub_cathegory, precio, Tamano"""
+    cursor = get_db()
+    record = selectPromociones("WHERE Nombre_promocion = ?;", cursor, nombre_promocion)  # type: list
+    for element in record:
+        if 'Id_promocion' in element:
+            id_promocion = element['Id_promocion']
+            print(id_promocion)
+            componentes = selectComponentesPromociones("WHERE Id_promocion = ?", cursor, (id_promocion,))  # type: list
+            for componente in componentes:
+                is_by_sub_cathegory = componente['Is_by_sub_cathegory']
+                if is_by_sub_cathegory is False:
+                    nombre_producto = componente['Nombre_producto']
+                    producto = GetProduct(nombre_producto)[0]
+                    componente['Producto'] = producto
+            element['Componentes'] = componentes
+    print(record, "marca")
+    cursor.close()
+    return record[:1]
+
 """---------------------------------------------------------------------------------
                                 Inserción de datos
    ---------------------------------------------------------------------------------"""
@@ -409,14 +465,15 @@ def insertClient(values, cursor):
     try:
         cursor.execute(query, tuple(values))
         cursor.commit()
-        print("Data inserted successfully into table User")
+        print("Data inserted successfully into table Cliente")
     except sqlite3.Error as error:
         print("Failed to insert data into table", error)
 
 
 def insertBoleta(values, cursor):
-    """Keys: Id_entrada, Id_boleta (fk_Boletas), Nombre_producto (fk_Productos), Cantidad"""
-    query = """INSERT INTO Boletas (Id_entrada, Id_boleta, Nombre_producto, Cantidad) VALUES (?, ?, ?, ?);"""
+    """Keys: Id_entrada, Id_boleta (fk_Boletas), Nombre_producto (fk_Productos), Cantidad, Tamano, Nombre_promocion, Cobro_adicional"""
+    query = """INSERT INTO Boletas (Id_boleta, Nombre_producto, Cantidad, Tamano, Nombre_promocion, Cobro_adicional)\
+     VALUES (?, ?, ?, ?, ?, ?);"""
     try:
         cursor.execute(query, tuple(values))
         cursor.commit()
@@ -461,10 +518,10 @@ def insertTurnos_caja(values, cursor):
 
 
 def insertVenta(values, cursor):
-    """Keys: Id_venta, Nombre_usuario (fk_Usuarios), Id_boleta (fk_Boletas), Nombre_cliente (fk_Clientes),
+    """Keys: Id_venta, Nombre_usuario (fk_Usuarios), Nombre_cliente (fk_Clientes),
         Direccion_cliente (fk_Clientes), Id_sesion (fk_Sesiones)"""
-    query = """INSERT INTO Ventas (Id_venta, Nombre_usuario, Id_boleta, Nombre_cliente, Direccion_cliente, Id_sesion)\
-     VALUES (?, ?, ?, ?, ?, ?);"""
+    query = """INSERT INTO Ventas (Nombre_usuario, Nombre_cliente, Direccion_cliente, Id_sesion)\
+     VALUES (?, ?, ?, ?);"""
     try:
         cursor.execute(query, tuple(values))
         cursor.commit()
@@ -531,17 +588,19 @@ def updateCliente(cursor, values):
 
 def updateBoleta(cursor, values):
     """
-    Keys: Id_entrada, Id_boleta (fk_Boletas), Nombre_producto (fk_Productos), Cantidad
+    Keys: Id_entrada, Id_boleta (fk_Boletas), Nombre_producto (fk_Productos), Cantidad, Tamano, Nombre_promocion, Cobro_adicional
 
     :param cursor: sqlite3 database cursor
-    :param values: tuple(Id_entrada, Id_boleta, Nombre_producto, Cantidad, Id_entrada)
+    :param values: tuple(Id_boleta, Nombre_producto, Cantidad, Tamano, Nombre_promocion, Cobro_adicional, Id_entrada)
     :return: None
     """
     query = """UPDATE Boletas 
-                SET Id_entrada = ? ,
-                    Id_boleta = ?,
+                SET Id_boleta = ?,
                     Nombre_producto = ?,
-                    Cantidad = ?
+                    Cantidad = ?,
+                    Tamano = ?,
+                    Nombre_promocion = ?,
+                    Cobro_adicional = ?
                 WHERE Id_entrada = ?;"""
     try:
         if len(values) != 5:
@@ -639,18 +698,17 @@ def updateTurnos_caja(cursor, values):
 
 def updateVentas(cursor, values):
     """
-    Keys: Id_venta, Nombre_usuario (fk_Usuarios), Id_boleta (fk_Boletas), Nombre_cliente (fk_Clientes),
+    Keys: Id_venta, Nombre_usuario (fk_Usuarios), Nombre_cliente (fk_Clientes),
         Direccion_cliente (fk_Clientes), Id_sesion (fk_Sesiones)
 
     :param cursor: sqlite3 database cursor
-    :param values: tuple(Id_venta, Nombre_usuario, Id_boleta, Nombre_cliente, Direccion_cliente, Id_sesio, Id_venta)
+    :param values: tuple(Id_venta, Nombre_usuario, Nombre_cliente, Direccion_cliente, Id_sesio, Id_venta)
     :return: None
     """
     selectVentas()
     query = """UPDATE Ventas 
                 SET Id_venta = ? ,
                     Nombre_usuario = ?,
-                    Id_boleta = ?,
                     Nombre_cliente = ?,
                     Direccion_cliente = ?,
                     Id_sesio = ?
