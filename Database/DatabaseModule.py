@@ -270,7 +270,7 @@ def GetBoletas(boleta_key):
 def GetProduct(product_key):
     """Keys: Nombre_producto, Precio_unitario, Categoria, Sub_categoria, Precio_mediana, Precio_familiar"""
     cursor = get_db()
-    record = selectProducto("WHERE Nombre_producto = ?;", cursor, tuple(product_key,))
+    record = selectProducto("WHERE Nombre_producto = ?;", cursor, tuple(product_key))
     cursor.close()
     return record
 
@@ -404,6 +404,26 @@ def GetLastNVentas(n):
     return record
 
 
+def GetLastNPromociones(n):
+    """Keys: Id_promocion, Nombre_promocion, Is_by_sub_cathegory, precio, Tamano"""
+    cursor = get_db()
+    record = selectPromociones("ORDER BY Id_promocion DESC;", cursor)[:n]  # type: list
+    for element in record:
+        if 'Id_promocion' in element:
+            id_promocion = element['Id_promocion']
+            print(id_promocion)
+            componentes = selectComponentesPromociones("WHERE Id_promocion = ?", cursor, (id_promocion,))  # type: list
+            for componente in componentes:
+                is_by_sub_cathegory = componente['Is_by_sub_cathegory']
+                if is_by_sub_cathegory is False:
+                    nombre_producto = componente['Nombre_producto']
+                    producto = GetProduct(nombre_producto)[0]
+                    componente['Producto'] = producto
+            element['Componentes'] = componentes
+    cursor.close()
+    return record
+
+
 def GetPromociones():
     """Keys: Id_promocion, Nombre_promocion, Is_by_sub_cathegory, precio, Tamano"""
     cursor = get_db()
@@ -432,7 +452,7 @@ def GetPromocion(nombre_promocion):
         if 'Id_promocion' in element:
             id_promocion = element['Id_promocion']
             print(id_promocion)
-            componentes = selectComponentesPromociones("WHERE Id_promocion = ?", cursor, (id_promocion,))  # type: list
+            componentes = selectComponentesPromociones("WHERE Id_promocion = ?", cursor, tuple(id_promocion))  # type: list
             for componente in componentes:
                 is_by_sub_cathegory = componente['Is_by_sub_cathegory']
                 if is_by_sub_cathegory is False:
@@ -525,9 +545,51 @@ def insertVenta(values, cursor):
     try:
         cursor.execute(query, tuple(values))
         cursor.commit()
-        print("Data inserted successfully into table User")
+        print("Data inserted successfully into table Ventas")
     except sqlite3.Error as error:
         print("Failed to insert data into table", error)
+
+
+def insertPromocion(values_promocion, values_componentes, cursor=get_db()):
+    """Keys_promocion: Nombre_promocion, Is_by_sub_cathegory, precio, Tamano
+
+       Keys_componentes: Is_by_sub_cathegory, Cantidad, Nombre_Producto, Sub_categoria"""
+    query = """INSERT INTO Promociones (Nombre_promocion, Is_by_sub_cathegory, precio, Tamano)\
+         VALUES (?, ?, ?, ?);"""
+    try:
+        cursor.execute(query, tuple(values_promocion))
+        cursor.commit()
+        print("Data inserted successfully into table Promociones")
+    except sqlite3.Error as error:
+        print("Failed to insert data into table", error)
+        return
+    last = GetLastNPromociones(1)
+    new_id = last[0]['Id_promocion']
+    query = """INSERT INTO Componentes_promociones (Id_promocion, Is_by_sub_cathegory, Cantidad, Nombre_Producto,\
+     Sub_categoria) VALUES (?, ?, ?, ?, ?);"""
+    for component in values_componentes:
+        component = component   # type: list
+        component.insert(0, new_id)
+        try:
+            cursor.execute(query, tuple(values_promocion))
+            cursor.commit()
+            print("Data inserted successfully into table Componentes_promociones")
+        except sqlite3.Error as error:
+            print("Failed to insert data into table", error)
+    #     if 'Id_promocion' in element:
+    #         id_promocion = element['Id_promocion']
+    #         print(id_promocion)
+    #         componentes = selectComponentesPromociones("WHERE Id_promocion = ?", cursor, tuple(id_promocion))  # type: list
+    #         for componente in componentes:
+    #             is_by_sub_cathegory = componente['Is_by_sub_cathegory']
+    #             if is_by_sub_cathegory is False:
+    #                 nombre_producto = componente['Nombre_producto']
+    #                 producto = GetProduct(nombre_producto)[0]
+    #                 componente['Producto'] = producto
+    #         element['Componentes'] = componentes
+    # print(record, "marca")
+    # cursor.close()
+    # return record[:1]
 
 
 """---------------------------------------------------------------------------------
@@ -619,20 +681,18 @@ def updateProducto(cursor, values):
     Keys: Nombre_producto, Precio_unitario, Categoria, Sub_categoria, Precio_mediana, Precio_familiar
 
     :param cursor: sqlite3 database cursor
-    :param values: tuple(Nombre_producto, Precio_unitario, Categoria, Sub_categoria, Precio_mediana, Precio_familiar,
-                         Nombre_producto)
+    :param values: tuple(Precio_unitario, Categoria, Sub_categoria, Precio_mediana, Precio_familiar, Nombre_producto)
     :return: None
     """
     query = """UPDATE Producto 
-                SET Nombre_producto = ? ,
-                    Precio_unitario = ?,
+                SET Precio_unitario = ?,
                     Categoria = ?,
                     Sub_categoria = ?,
                     Precio_mediana = ?,
                     Precio_familiar = ?
                 WHERE Nombre_producto = ?;"""
     try:
-        if len(values) != 7:
+        if len(values) != 6:
             print("Wrong amount of parameters!")
             raise sqlite3.Error
         else:
@@ -669,6 +729,54 @@ def updateSesiones(cursor, values):
             print("Table Sesiones successfully updated")
     except sqlite3.Error as error:
         print("Failed to update data from table", error)
+
+
+def updatePromocion(cursor, values_promo, values_componentes):
+    """
+        Keys: Id_promocion, Nombre_promocion, Is_by_sub_cathegory, precio, Tamano
+
+        :param cursor: sqlite3 database cursor
+        :param values_promo: tuple(Nombre_promocion, Is_by_sub_cathegory, precio, Tamano, Id_promocion)
+        :param values_componentes: list([Tuple(Is_by_sub_cathegory, Cantidad, Nombre_Producto, Sub_categoria,
+         Id_componente)])
+        :return: None
+        """
+    query = """UPDATE Producto 
+                    SET Nombre_promocion = ?,
+                        Is_by_sub_cathegory = ?,
+                        precio = ?,
+                        Tamano = ?
+                    WHERE Id_promocion = ?;"""
+    try:
+        if len(values_promo) != 5:
+            print("Wrong amount of parameters!")
+            raise sqlite3.Error
+        else:
+            cursor.execute(query, tuple(values_promo))
+            cursor.commit()
+            print("Table Producto successfully updated")
+    except sqlite3.Error as error:
+        print("Failed to update data from table", error)
+    last = GetLastNPromociones(1)
+    new_id = last[0]['Componentes']['Id_componente']
+    query = """UPDATE Componentes_promociones 
+                        SET Id_promocion = ?,
+                            Is_by_sub_cathegory = ?,
+                            Cantidad = ?,
+                            Nombre_Producto = ?,
+                            Sub_categoria = ?
+                        WHERE Id_componente = ?;"""
+    for componente in values_componentes:
+        try:
+            if len(componente) != 6:
+                print("Wrong amount of parameters!")
+                raise sqlite3.Error
+            else:
+                cursor.execute(query, tuple(componente))
+                cursor.commit()
+                print("Table Producto successfully updated")
+        except sqlite3.Error as error:
+            print("Failed to update data from table", error)
 
 
 def updateTurnos_caja(cursor, values):

@@ -81,6 +81,70 @@ def set_client(data):
         print("wrong values length", len(data))
 
 
+def insert_product(product_data: dict):
+    data = [None for i in product_data.keys()]
+    for key in product_data.keys():
+        if key == 'Nombre_producto':
+            data[0] = product_data['Nombre_producto']   # type: str
+        elif key == 'Precio_unitario':
+            data[1] = product_data['Precio_unitario']   # type: str
+        elif key == 'Categoria':
+            data[2] = product_data['Categoria']   # type: str
+        elif key == 'Sub_categoria':
+            data[3] = product_data['Sub_categoria']   # type: str
+        elif key == 'Precio_mediana':
+            data[4] = product_data['Precio_mediana']   # type: str
+        elif key == 'Precio_familiar':
+            data[5] = product_data['Precio_familiar']   # type: str
+    cursor = db.get_db()
+    verify = db.GetProduct(tuple((data[0],)))
+    if len(verify) == 0:
+        db.insertProduct(tuple(data), cursor)
+    else:
+        print("Producto ya ingresado, actualizando...")
+        data.append(data[0])
+        data.pop(0)
+        db.updateProducto(cursor, tuple(data))
+        print("Producto actualizado.")
+
+
+def insert_promo(promo_data: dict, componentes_data: list):
+    """:param promo_data: dict(Nombre_promocion, Is_by_sub_cathegory, precio, Tamano)
+        :param componentes_data: list([Tuple(Is_by_sub_cathegory, Cantidad, Nombre_Producto, Sub_categoria)])"""
+    data_promo = [None for i in promo_data.keys()]
+    data_componentes = [None for i in componentes_data[0].keys()]
+    for key in promo_data.keys():
+        if key == 'Nombre_promocion':
+            data_promo[0] = promo_data['Nombre_promocion']
+        elif key == 'Is_by_sub_cathegory':
+            data_promo[1] = promo_data['Is_by_sub_cathegory']
+        elif key == 'precio':
+            data_promo[2] = promo_data['precio']
+        elif key == 'Tamano':
+            data_promo[3] = promo_data['Tamano']
+    for component in componentes_data:
+        for key in component.keys():
+            if key == 'Is_by_sub_cathegory':
+                data_componentes[0] = component['Is_by_sub_cathegory']
+            elif key == 'Cantidad':
+                data_componentes[1] = component['Cantidad']
+            elif key == 'Nombre_Producto':
+                data_componentes[2] = component['Nombre_Producto']
+            elif key == 'Sub_categoria':
+                data_componentes[3] = component['Sub_categoria']
+    cursor = db.get_db()
+    verify = db.GetPromocion(tuple((data_promo[0],)))
+    if len(verify) == 0:
+        db.insertPromocion(tuple(data_promo), tuple(data_componentes), cursor)
+
+    else:
+        print("Producto ya ingresado, actualizando...")
+        data_promo.append(data_promo[0])
+        data_promo.pop(0)
+        db.updatePromocion(cursor, tuple(data_promo), tuple(data_componentes))
+        print("Producto actualizado.")
+
+
 def set_boleta(data_venta, data_boleta):
     """
     key order venta: (Nombre_usuario, Nombre_cliente, Direccion_cliente, Id_sesion,)

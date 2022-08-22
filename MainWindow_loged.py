@@ -5,7 +5,7 @@
 # Created by: PyQt5 UI code generator 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
-
+from binhex import openrsrc
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QModelIndex
@@ -21,6 +21,7 @@ from añadir_ingrediente_Dialog import Ui_Dialog as Ui_añadir_ingrediente
 from Controller import ControlModule
 
 import numpy as np
+from numpy import genfromtxt
 
 class Ui_MainWindow(object):
 
@@ -191,7 +192,7 @@ class Ui_MainWindow(object):
         self.groupBox_2.setGeometry(QtCore.QRect(820, 30, 391, 691))
         self.groupBox_2.setObjectName("groupBox_2")
         self.treeView_Venta = QtWidgets.QTreeWidget(self.groupBox_2)
-        self.treeView_Venta.setGeometry(QtCore.QRect(10, 20, 371, 661))
+        self.treeView_Venta.setGeometry(QtCore.QRect(10, 20, 371, 631))
         self.treeView_Venta.setMouseTracking(True)
         self.treeView_Venta.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
         self.treeView_Venta.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectItems)
@@ -264,6 +265,8 @@ class Ui_MainWindow(object):
         self.actionEditar_un_producto.setObjectName("actionEditar_un_producto")
         self.actionSubir_CSV_con_lista_de_productos = QtWidgets.QAction(MainWindow)
         self.actionSubir_CSV_con_lista_de_productos.setObjectName("actionSubir_CSV_con_lista_de_productos")
+        self.actionSubir_CSV_con_lista_de_promociones = QtWidgets.QAction(MainWindow)
+        self.actionSubir_CSV_con_lista_de_promociones.setObjectName("actionSubir_CSV_con_lista_de_promociones")
         self.actionAgregar_promoci_n = QtWidgets.QAction(MainWindow)
         self.actionAgregar_promoci_n.setObjectName("actionAgregar_promoci_n")
         self.actionEditar_promoci_n = QtWidgets.QAction(MainWindow)
@@ -287,6 +290,7 @@ class Ui_MainWindow(object):
         self.menuEditar_productos.addAction(self.actionEditar_un_producto)
         self.menuEditar_productos.addAction(self.actionEliminar_un_producto)
         self.menuEditar_promociones.addAction(self.actionAgregar_promoci_n)
+        self.menuEditar_promociones.addAction(self.actionSubir_CSV_con_lista_de_promociones)
         self.menuEditar_promociones.addAction(self.actionEditar_promoci_n)
         self.menuEditar_promociones.addAction(self.actionEliminar_promoci_n)
         self.menuEditar.addAction(self.menuEditar_productos.menuAction())
@@ -318,6 +322,7 @@ class Ui_MainWindow(object):
         self.accion_ingrediente = QtWidgets.QAction("Agregar ingrediente", self.treeView_Venta)
         self.accion_comentario = QtWidgets.QAction("Agregar comentario", self.treeView_Venta)
 
+        self.actionSubir_CSV_con_lista_de_productos.triggered.connect(self.on_click_action_agregar_productos_CSV)
         self.accion_editar.triggered.connect(self.on_click_action_editar)
         self.accion_ingrediente.triggered.connect(self.on_click_action_ingrediente)
         self.accion_comentario.triggered.connect(self.on_click_action_comentario)
@@ -344,7 +349,6 @@ class Ui_MainWindow(object):
         self.is_despacho = False
         self.is_pedidos_ya = False
         self.configure_enabling()
-        # self.buscar_archivo()
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -392,6 +396,8 @@ class Ui_MainWindow(object):
         self.actionEditar_un_producto.setText(_translate("MainWindow", "Editar un producto"))
         self.actionSubir_CSV_con_lista_de_productos.setText(
             _translate("MainWindow", "Subir CSV con lista de productos"))
+        self.actionSubir_CSV_con_lista_de_promociones.setText(
+            _translate("MainWindow", "Subir CSV con lista de promociones"))
         self.actionAgregar_promoci_n.setText(_translate("MainWindow", "Agregar promoción"))
         self.actionEditar_promoci_n.setText(_translate("MainWindow", "Editar promoción"))
         self.actionEliminar_promoci_n.setText(_translate("MainWindow", "Eliminar promoción"))
@@ -497,9 +503,8 @@ class Ui_MainWindow(object):
     def buscar_archivo(self):
         dialog = QDialog()
         dialog.ui = Buscador_archvos()
-        # ret = dialog.exec()
-        # if ret == dialog.Accepted:
-        print(dialog.ui.files)
+        files = dialog.ui.setupUi()
+        return files
 
     def abrir_caja(self):
         pass
@@ -522,6 +527,10 @@ class Ui_MainWindow(object):
                 for j in range(self.treeView_Venta.topLevelItem(i).childCount()):
                     if "Agregado: " in self.treeView_Venta.topLevelItem(i).child(j).text(1):
                         total += int(self.treeView_Venta.topLevelItem(i).child(j).text(2))
+                    elif self.treeView_Venta.topLevelItem(i).child(j).childCount() > 0:
+                        for k in range(self.treeView_Venta.topLevelItem(i).child(j).childCount()):
+                            if "Agregado: " in self.treeView_Venta.topLevelItem(i).child(j).child(k).text(1):
+                                total += int(self.treeView_Venta.topLevelItem(i).child(j).child(k).text(2))
         self.lineEdit_Total.setText(str(total))
 
 
@@ -628,6 +637,7 @@ class Ui_MainWindow(object):
     def On_ventas_tree_double_click(self, index: QtCore.QModelIndex):
         print(index.data(0))
         self.treeView_Venta.takeTopLevelItem(index.row())
+        self.on_change_tree()
 
     def on_click_Despacho_RButton(self):
         print("despacho", self.is_despacho)
@@ -759,6 +769,7 @@ class Ui_MainWindow(object):
             elif categoria == 'Bebidas':
                 self.listBebidas.addItem(producto['Nombre_producto'])
         for promocion, i in zip(promociones, range(len(promociones))):
+            # if "ñ" in promocion['Nombre_promocion']
             self.listPromociones.addItem(promocion['Nombre_promocion'])
         self.promociones = promociones
 
@@ -766,6 +777,64 @@ class Ui_MainWindow(object):
         self.treeView_Venta.setColumnCount(3)
         self.treeView_Venta.setHeaderLabels(["Producto", "Detalle", "Cobros extra"])
         self.treeView_Venta.addActions([self.accion_editar, self.accion_ingrediente, self.accion_comentario])
+
+    def on_click_action_agregar_productos_CSV(self):
+        files = self.buscar_archivo()
+        if files:
+            new_products = {}
+            data = genfromtxt(files[0], dtype=str, delimiter=",", encoding="utf-8")
+            headers = data[0][1:].split(";")[:6]
+            for line in data[1:]:
+                line = line
+                print(type(line))
+                product = line.split(";")[:6]
+                new_products[headers[0]] = product[0]
+                new_products[headers[1]] = int(product[1])
+                if product[2]:
+                    new_products[headers[2]] = int(product[2])
+                else:
+                    new_products[headers[2]] = None
+                if product[3]:
+                    new_products[headers[3]] = int(product[3])
+                else:
+                    new_products[headers[3]] = None
+                new_products[headers[4]] = product[4]
+                if product[5]:
+                    new_products[headers[5]] = product[5]
+                else:
+                    new_products[headers[5]] = None
+                ControlModule.insert_product(new_products)
+        print(files)
+        self.load_buttons()
+
+    def on_click_action_agregar_promociones_CSV(self):
+        files = self.buscar_archivo()
+        if files:
+            new_promo = {}
+            data = genfromtxt(files[0], dtype=str, delimiter=",", encoding="utf-8")
+            headers = data[0][1:].split(";")[:6]
+            for line in data[1:]:
+                line = line
+                print(type(line))
+                product = line.split(";")[:6]
+                new_promo[headers[0]] = product[0]
+                new_promo[headers[1]] = int(product[1])
+                if product[2]:
+                    new_promo[headers[2]] = int(product[2])
+                else:
+                    new_promo[headers[2]] = None
+                if product[3]:
+                    new_promo[headers[3]] = int(product[3])
+                else:
+                    new_promo[headers[3]] = None
+                new_promo[headers[4]] = product[4]
+                if product[5]:
+                    new_promo[headers[5]] = product[5]
+                else:
+                    new_promo[headers[5]] = None
+                ControlModule.insert_product(new_promo)
+        print(files)
+        self.load_buttons()
 
     def on_click_action_editar(self):
         current_index = self.treeView_Venta.currentIndex()
@@ -794,24 +863,9 @@ class Ui_MainWindow(object):
                 self.on_change_tree()
 
     def on_click_action_ingrediente(self):
-        index = self.treeView_Venta.currentIndex()
-        if index.row() >= 0:
-            current_item = self.treeView_Venta.currentItem()
-            if current_item.text(0) == "":
-                if current_item.text(1) == "":
-                    index_obj = self.treeView_Venta.currentIndex()
-                    if index_obj.row() == 0 or index_obj.row() == -1:
-                        return
-                    for i in range(index_obj.row() - 1, -1, -1):
-                        if self.treeView_Venta.itemAt(i, 0).text(0) != "":
-                            index_obj = index_obj.model().index(i, 0)
-                            break
-                    self.treeView_Venta.setCurrentIndex(index_obj)
-                else:
-                    name = current_item.parent().text(0).split(": ")
-                    if len(name) == 2 and name[0] == "Promoción":
-                        parent = current_item.parent().parent()   # type: QtWidgets.QTreeWidget
-                        parent.currentIndex()
+        item = self.treeView_Venta.currentItem()
+        if item:
+            nombre = item.text(1).split(": ")
             dialog = QDialog()
             dialog.ui = Añadir_ingrediente_Dialog()
             dialog.ui.setupUi(dialog)
@@ -819,43 +873,36 @@ class Ui_MainWindow(object):
             nombre_ingrediente = dialog.ui.lineEdit_nombre.text()
             precio = dialog.ui.lineEdit_precio.text()
             if response == dialog.Accepted:
-                item = QtWidgets.QTreeWidgetItem(self.treeView_Venta.currentItem())
-                item.setText(1, "Agregado: " + nombre_ingrediente)
-                item.setText(2, precio)
-                if self.treeView_Venta.currentItem().text(0).split(": ")[0] == "Promoción":
-                   self.treeView_Venta.itemFromIndex(index).addChild(item)
+                if nombre[0] not in ["Agregado", "Comentario"]:
+                    new_item = QtWidgets.QTreeWidgetItem(item)
+                    new_item.setText(1, "Agregado: " + nombre_ingrediente)
+                    new_item.setText(2, precio)
+                    item.addChild(new_item)
                 else:
-                    self.treeView_Venta.currentItem().addChild(item)
+                    new_item = QtWidgets.QTreeWidgetItem(item.parent())
+                    new_item.setText(1, "Agregado: " + nombre_ingrediente)
+                    new_item.setText(2, precio)
+                    item.parent().addChild(new_item)
                 self.on_change_tree()
 
     def on_click_action_comentario(self):
-        index = self.treeView_Venta.currentIndex()
-        if index.row() >= 0:
-            current_item = self.treeView_Venta.currentItem()
-            print(current_item)
-            if current_item.text(0) == "":
-                index_obj = self.treeView_Venta.currentIndex()
-                if index_obj.row() == 0 or index_obj.row() == -1:
-                    return
-                for i in range(index_obj.row() - 1, -1, -1):
-                    if self.treeView_Venta.itemAt(i, 0).text(0) != "":
-                        index_obj = index_obj.model().index(i, 0)
-                        break
-                self.treeView_Venta.setCurrentIndex(index_obj)
-            nombre_producto = self.treeView_Venta.currentItem().text(0)
-            precio = self.treeView_Venta.currentItem().text(1)
+        item = self.treeView_Venta.currentItem()
+        if item:
+            nombre = item.text(1).split(": ")
             dialog = QDialog()
             dialog.ui = Añadir_comentario_Dialog()
             dialog.ui.setupUi(dialog)
             response = dialog.exec()
             comentario = dialog.ui.lineEdit_comentario.text()
             if response == dialog.Accepted:
-                item = QtWidgets.QTreeWidgetItem(self.treeView_Venta.currentItem())
-                item.setText(1, "Comentario: " + comentario)
-                if self.treeView_Venta.currentItem().text(0).split(": ")[0] == "Promoción":
-                   self.treeView_Venta.itemFromIndex(index).addChild(item)
+                if nombre[0] not in ["Agregado", "Comentario"]:
+                    new_item = QtWidgets.QTreeWidgetItem(item)
+                    new_item.setText(1, "Comentario: " + comentario)
+                    item.addChild(new_item)
                 else:
-                    self.treeView_Venta.currentItem().addChild(item)
+                    new_item = QtWidgets.QTreeWidgetItem(item.parent())
+                    new_item.setText(1, "Comentario: " + comentario)
+                    item.parent().addChild(new_item)
 
 
 
