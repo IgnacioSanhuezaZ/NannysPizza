@@ -15,8 +15,8 @@ class Ui_file_browser_Dialog(QFileDialog):
         self.files = None
         # self.setupUi()
 
-    def setupUi(self):
-        self.setWindowTitle(self.title)
+    def setupUi(self, title):
+        self.setWindowTitle(self.title + title)
         self.setGeometry(self.left, self.top, self.width, self.height)
 
         options = QFileDialog.Options()

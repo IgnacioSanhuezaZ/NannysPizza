@@ -323,6 +323,7 @@ class Ui_MainWindow(object):
         self.accion_comentario = QtWidgets.QAction("Agregar comentario", self.treeView_Venta)
 
         self.actionSubir_CSV_con_lista_de_productos.triggered.connect(self.on_click_action_agregar_productos_CSV)
+        self.actionSubir_CSV_con_lista_de_promociones.triggered.connect(self.on_click_action_agregar_promociones_CSV)
         self.accion_editar.triggered.connect(self.on_click_action_editar)
         self.accion_ingrediente.triggered.connect(self.on_click_action_ingrediente)
         self.accion_comentario.triggered.connect(self.on_click_action_comentario)
@@ -500,10 +501,10 @@ class Ui_MainWindow(object):
             self.is_admin = False
             self.configure_enabling()
 
-    def buscar_archivo(self):
+    def buscar_archivo(self, titulo=""):
         dialog = QDialog()
         dialog.ui = Buscador_archvos()
-        files = dialog.ui.setupUi()
+        files = dialog.ui.setupUi(titulo)
         return files
 
     def abrir_caja(self):
@@ -609,7 +610,7 @@ class Ui_MainWindow(object):
             print(prod[0].keys())
             componentes = prod[0]['Componentes']
             cantidad = np.array([dictio['Cantidad'] for dictio in componentes]).sum()
-            if componentes[0]['Is_by_sub_cathegory']:
+            if componentes['Sub_categoria']:
                 nombres = [elem['Sub_categoria'] for elem in componentes]
             else:
                 nombres = [elem['Nombre_Producto'] for elem in componentes]
@@ -756,22 +757,29 @@ class Ui_MainWindow(object):
     def load_buttons(self):
         """
         """
+        self.listPizzas.clear()
+        self.listEmpanadas.clear()
+        self.listAgregados.clear()
+        self.listBebidas.clear()
+        self.listPromociones.clear()
         productos = ControlModule.get_Productos()
         promociones = ControlModule.get_Promociones()
-        for producto in productos:
-            categoria = producto['Categoria']
-            if categoria == 'Pizzas':
-                self.listPizzas.addItem(producto['Nombre_producto'])
-            elif categoria == 'Empanadas':
-                self.listEmpanadas.addItem(producto['Nombre_producto'])
-            elif categoria == 'Agregados':
-                self.listAgregados.addItem(producto['Nombre_producto'])
-            elif categoria == 'Bebidas':
-                self.listBebidas.addItem(producto['Nombre_producto'])
-        for promocion, i in zip(promociones, range(len(promociones))):
-            # if "ñ" in promocion['Nombre_promocion']
-            self.listPromociones.addItem(promocion['Nombre_promocion'])
-        self.promociones = promociones
+        if productos:
+            for producto in productos:
+                categoria = producto['Categoria']
+                if categoria == 'Pizzas':
+                    self.listPizzas.addItem(producto['Nombre_producto'])
+                elif categoria == 'Empanadas':
+                    self.listEmpanadas.addItem(producto['Nombre_producto'])
+                elif categoria == 'Agregados':
+                    self.listAgregados.addItem(producto['Nombre_producto'])
+                elif categoria == 'Bebidas':
+                    self.listBebidas.addItem(producto['Nombre_producto'])
+        if promociones:
+            for promocion, i in zip(promociones, range(len(promociones))):
+                # if "ñ" in promocion['Nombre_promocion']
+                self.listPromociones.addItem(promocion['Nombre_promocion'])
+            self.promociones = promociones
 
     def load_tree(self):
         self.treeView_Venta.setColumnCount(3)
@@ -808,31 +816,36 @@ class Ui_MainWindow(object):
         self.load_buttons()
 
     def on_click_action_agregar_promociones_CSV(self):
-        files = self.buscar_archivo()
+        files = self.buscar_archivo(" Lista de productos")
         if files:
             new_promo = {}
-            data = genfromtxt(files[0], dtype=str, delimiter=",", encoding="utf-8")
-            headers = data[0][1:].split(";")[:6]
+            data = genfromtxt(files[0], dtype=str, delimiter=",", encoding="ISO-8859-1")
+            headers = data[0].split(";")[:4]
             for line in data[1:]:
-                line = line
-                print(type(line))
-                product = line.split(";")[:6]
+                product = line.split(";")[:4]
                 new_promo[headers[0]] = product[0]
                 new_promo[headers[1]] = int(product[1])
-                if product[2]:
-                    new_promo[headers[2]] = int(product[2])
-                else:
-                    new_promo[headers[2]] = None
-                if product[3]:
-                    new_promo[headers[3]] = int(product[3])
-                else:
-                    new_promo[headers[3]] = None
-                new_promo[headers[4]] = product[4]
-                if product[5]:
-                    new_promo[headers[5]] = product[5]
-                else:
-                    new_promo[headers[5]] = None
-                ControlModule.insert_product(new_promo)
+                new_promo[headers[2]] = int(product[2])
+                new_promo[headers[3]] = int(product[3])
+                ControlModule.insert_promo(new_promo)
+            second_files = self.buscar_archivo(" Lista de componentes de productos")
+            if second_files:
+                new_component = {}
+                data = genfromtxt(second_files[0], dtype=str, delimiter=",", encoding="ISO-8859-1")
+                headers = data[0].split(";")[:6]
+                for line in data[1:]:
+                    product = line.split(";")[:6]
+                    new_component[headers[0]] = product[0]
+                    if product[1]:
+                        new_component[headers[1]] = product[1]
+                    else:
+                        new_component[headers[1]] = None
+                    if product[2]:
+                        new_component[headers[2]] = product[2]
+                    else:
+                        new_component[headers[2]] = None
+                    new_component[headers[3]] = int(product[3])
+                    ControlModule.insert_Componente_promo(new_component)
         print(files)
         self.load_buttons()
 

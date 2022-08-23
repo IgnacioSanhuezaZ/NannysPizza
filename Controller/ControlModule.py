@@ -108,11 +108,10 @@ def insert_product(product_data: dict):
         print("Producto actualizado.")
 
 
-def insert_promo(promo_data: dict, componentes_data: list):
+def insert_promo(promo_data: dict):
     """:param promo_data: dict(Nombre_promocion, Is_by_sub_cathegory, precio, Tamano)
-        :param componentes_data: list([Tuple(Is_by_sub_cathegory, Cantidad, Nombre_Producto, Sub_categoria)])"""
+       """
     data_promo = [None for i in promo_data.keys()]
-    data_componentes = [None for i in componentes_data[0].keys()]
     for key in promo_data.keys():
         if key == 'Nombre_promocion':
             data_promo[0] = promo_data['Nombre_promocion']
@@ -122,26 +121,40 @@ def insert_promo(promo_data: dict, componentes_data: list):
             data_promo[2] = promo_data['precio']
         elif key == 'Tamano':
             data_promo[3] = promo_data['Tamano']
-    for component in componentes_data:
-        for key in component.keys():
-            if key == 'Is_by_sub_cathegory':
-                data_componentes[0] = component['Is_by_sub_cathegory']
-            elif key == 'Cantidad':
-                data_componentes[1] = component['Cantidad']
-            elif key == 'Nombre_Producto':
-                data_componentes[2] = component['Nombre_Producto']
-            elif key == 'Sub_categoria':
-                data_componentes[3] = component['Sub_categoria']
     cursor = db.get_db()
+    print(data_promo, "antes del caos")
     verify = db.GetPromocion(tuple((data_promo[0],)))
     if len(verify) == 0:
-        db.insertPromocion(tuple(data_promo), tuple(data_componentes), cursor)
-
+        db.insertPromocion(tuple(data_promo), cursor)
     else:
         print("Producto ya ingresado, actualizando...")
-        data_promo.append(data_promo[0])
-        data_promo.pop(0)
-        db.updatePromocion(cursor, tuple(data_promo), tuple(data_componentes))
+        data_promo.append(verify[0]['Id_promocion'])
+        print(verify[0]['Id_promocion'], "a ver...")
+        db.updatePromocion(cursor, tuple(data_promo))
+        print("Producto actualizado.")
+
+
+def insert_Componente_promo(componentes_data: dict):
+    """:param componentes_data: list([Tuple(Is_by_sub_cathegory, Cantidad, Nombre_Producto, Sub_categoria)])"""
+    data_componentes = [None for i in componentes_data.keys()]
+    for key in componentes_data.keys():
+        if key == 'Id_promocion':
+            data_componentes[0] = componentes_data['Id_promocion']
+        elif key == 'Cantidad':
+            data_componentes[1] = componentes_data['Cantidad']
+        elif key == 'Nombre_Producto':
+            data_componentes[2] = componentes_data['Nombre_Producto']
+        elif key == 'Sub_categoria':
+            data_componentes[3] = componentes_data['Sub_categoria']
+    cursor = db.get_db()
+    verify = db.ExistComponentesPromocion(tuple(data_componentes))
+    if not verify:
+        print(tuple(data_componentes), data_componentes[0], componentes_data)
+        db.insertComponentePromo(tuple(data_componentes), cursor)
+    else:
+        print("Producto ya ingresado, actualizando...")
+        data_componentes.append(verify)
+        db.updateComponentePromo(tuple(data_componentes), cursor)
         print("Producto actualizado.")
 
 
