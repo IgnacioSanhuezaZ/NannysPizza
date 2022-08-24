@@ -13,7 +13,7 @@ class Ui_file_browser_Dialog(QFileDialog):
         self.width = 640
         self.height = 480
         self.files = None
-        # self.setupUi()
+        # self.setupUi("Mensaje...")
 
     def setupUi(self, title):
         self.setWindowTitle(self.title + title)
@@ -21,13 +21,13 @@ class Ui_file_browser_Dialog(QFileDialog):
 
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        self.files, _ = QFileDialog.getOpenFileNames(self, "QFileDialog.getOpenFileNames()", "",
+        self.files, _ = QFileDialog.getOpenFileNames(self, self.title + title, "",
                                                      "CSV Files (*.csv);;Python Files (*.py)", options=options)
         return self.files
 
 
 
-#
+
 # if __name__ == '__main__':
 #     app = QApplication(sys.argv)
 #     ex = Ui_file_browser_Dialog()

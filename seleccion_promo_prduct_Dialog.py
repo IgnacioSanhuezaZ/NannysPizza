@@ -68,7 +68,7 @@ class Ui_sub_cathegory_promo_select(QDialog):
             print("Ya está ingresada la cantidad suficiente de productos seleccionados")
 
     def On_selection_list_double_click(self, index: QtCore.QModelIndex):
-        self.listSeleccion.removeItemWidget(self.listSeleccion.currentItem())
+        self.listSeleccion.takeItem(self.listSeleccion.currentIndex().row())
 
     def on_accept(self):
         if self.listSeleccion.count() == self.cantidad:

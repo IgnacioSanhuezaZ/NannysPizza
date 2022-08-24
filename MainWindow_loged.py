@@ -328,6 +328,7 @@ class Ui_MainWindow(object):
         self.accion_ingrediente.triggered.connect(self.on_click_action_ingrediente)
         self.accion_comentario.triggered.connect(self.on_click_action_comentario)
         self.actionIniciar_Sesion.triggered.connect(self.inicio_sesion)
+        self.actionCerrar_sesion.triggered.connect(self.cierre_sesion)
         self.radioBtn_Despacho.clicked.connect(self.on_click_Despacho_RButton)
         self.radioBtn_Pedidos_Ya.clicked.connect(self.on_click_PedidosYa_RButton)
         self.listPizzas.doubleClicked.connect(self.on_double_click_Pizzas)
@@ -508,17 +509,19 @@ class Ui_MainWindow(object):
         return files
 
     def abrir_caja(self):
-        pass
+        pass   # todo: apertura de caja
 
     def cerrar_caja(self):
-        pass
+        pass   # todo: cierre de caja
 
     def get_info_last_sesion(self):
         last_session = ControlModule.getLastSession()   # type: list
         if last_session and 'Fecha_cierre' in last_session[0]:
             if last_session[0]['Fecha_cierre'] is None:
                 self.caja_abierta = True
-                self.id_session = last_session[0]['Id_sesion']
+            else:
+                self.caja_abierta = False
+            self.id_session = last_session[0]['Id_sesion']
 
     def on_change_tree(self):
         total = 0
@@ -543,14 +546,17 @@ class Ui_MainWindow(object):
             if self.radioButton_individual.isChecked():
                 precio = prod[0]['Precio_unitario']
                 tamano = "Precio_unitario"
+                tamano_str = " Individual"
             elif self.radioButton_Mediana.isChecked():
                 precio = prod[0]['Precio_mediana']
                 tamano = "Precio_mediana"
+                tamano_str = " Mediana"
             elif self.radioButton_Familiar.isChecked():
                 precio = prod[0]['Precio_familiar']
                 tamano = "Precio_familiar"
+                tamano_str = " Familiar"
             item = QtWidgets.QTreeWidgetItem(self.treeView_Venta)
-            item.setText(0, nombre_producto)
+            item.setText(0, nombre_producto + tamano_str)
             if precio is None:
                 precio = 0
             item.setText(1, str(precio))
@@ -603,6 +609,7 @@ class Ui_MainWindow(object):
     def on_double_click_Promociones(self, index: QModelIndex):
         nombre_promocion = self.listPromociones.item(index.row()).text()
         prod = ControlModule.get_Promocion(nombre_promocion)
+        items_a_ingresar = []
         print(prod)
         if prod:
             precio = prod[0]['precio']
@@ -610,30 +617,49 @@ class Ui_MainWindow(object):
             print(prod[0].keys())
             componentes = prod[0]['Componentes']
             cantidad = np.array([dictio['Cantidad'] for dictio in componentes]).sum()
-            if componentes['Sub_categoria']:
-                nombres = [elem['Sub_categoria'] for elem in componentes]
-            else:
-                nombres = [elem['Nombre_Producto'] for elem in componentes]
-            dialog = QDialog()
-            dialog.ui = Select_promo_component()
-            dialog.ui.setupUi(dialog, nombre=nombres, cantidad=cantidad, por_categoria=componentes[0]['Is_by_sub_cathegory'])
-            rec = dialog.exec()
-            print(rec)
-            if rec == 1:
-                nombres = dialog.ui.nombre
-                item = QtWidgets.QTreeWidgetItem(self.treeView_Venta)
-                item.setText(0, "Promoción: " + nombre_promocion)
-                if precio is None:
-                    precio = 0
-                item.setText(1, str(precio))
-                item.setText(3, tamano)
-                for nombre in nombres:
-                    sub_item = QtWidgets.QTreeWidgetItem(item)
-                    sub_item.setText(1, nombre)
-                    item.addChild(sub_item)
-                self.treeView_Venta.addTopLevelItem(item)
-                self.treeView_Venta.expandAll()
-                self.on_change_tree()
+            for componente in componentes:
+                cantidad = componente['Cantidad']
+                if componente['Sub_categoria']:
+                    nombres = componente['Sub_categoria']
+                else:
+                    nombres = componente['Nombre_Producto']
+                por_categoria = componente['Sub_categoria'] is not None and componente['Sub_categoria'] != ""
+                dialog = QDialog()
+                dialog.ui = Select_promo_component()
+                dialog.ui.setupUi(dialog, nombre=[nombres], cantidad=cantidad, por_categoria=por_categoria)
+                dialog.setWindowTitle("Escoja el producto de la promoción")
+                rec = dialog.exec()
+                print(rec)
+                if rec == 1:
+                    if componente['Nombre_Producto'] is not None:
+                        nombre_categoria = ControlModule.get_Producto(componente['Nombre_Producto'])[0]['Categoria']
+                    else:
+                        nombre_categoria = ""
+                    if (por_categoria and componente['Sub_categoria'] != 'Bebidas 1 1/2') or\
+                            (nombre_categoria != "" and nombre_categoria == "Pizzas"):
+                        if tamano == 1:
+                            tamano_str = " Individual"
+                        elif tamano == 2:
+                            tamano_str = " Mediana"
+                        elif tamano == 3:
+                            tamano_str = " Familiar"
+                    else:
+                        tamano_str = ""
+                    items_a_ingresar += [e + tamano_str for e in dialog.ui.nombre]
+
+            item = QtWidgets.QTreeWidgetItem(self.treeView_Venta)
+            item.setText(0, "Promoción: " + nombre_promocion)
+            if precio is None:
+                precio = 0
+            item.setText(1, str(precio))
+            item.setText(3, str(tamano))
+            for nombre in items_a_ingresar:
+                sub_item = QtWidgets.QTreeWidgetItem(item)
+                sub_item.setText(1, nombre)
+                item.addChild(sub_item)
+            self.treeView_Venta.addTopLevelItem(item)
+            self.treeView_Venta.expandAll()
+            self.on_change_tree()
 
     def On_ventas_tree_double_click(self, index: QtCore.QModelIndex):
         print(index.data(0))
@@ -641,6 +667,7 @@ class Ui_MainWindow(object):
         self.on_change_tree()
 
     def on_click_Despacho_RButton(self):
+        # todo: agregar valor despacho a la boleta
         print("despacho", self.is_despacho)
         if self.is_despacho:
             if self.radioBtn_Despacho.isChecked():
@@ -650,11 +677,9 @@ class Ui_MainWindow(object):
             else:
                 self.is_despacho = True
                 self.radioBtn_Despacho.setChecked(True)
-                self.radioBtn_Despacho.setFocus(True)
         else:
             self.is_despacho = True
             self.radioBtn_Despacho.setChecked(True)
-            self.radioBtn_Despacho.setFocus(True)
         self.radioBtn_Pedidos_Ya.setChecked(False)
         self.radioBtn_Pedidos_Ya.clearMask()
         self.is_pedidos_ya = False
@@ -663,6 +688,7 @@ class Ui_MainWindow(object):
         print(self.is_despacho)
 
     def on_click_PedidosYa_RButton(self):
+        # todo: sacar despacho de la boleta si existe
         print("pedidos ya", self.is_pedidos_ya)
         if self.is_pedidos_ya:
             if self.radioBtn_Pedidos_Ya.isChecked():
@@ -672,11 +698,9 @@ class Ui_MainWindow(object):
             else:
                 self.is_pedidos_ya = True
                 self.radioBtn_Pedidos_Ya.setChecked(True)
-                self.radioBtn_Pedidos_Ya.setFocus(True)
         else:
             self.is_pedidos_ya = True
             self.radioBtn_Pedidos_Ya.setChecked(True)
-            self.radioBtn_Pedidos_Ya.setFocus(True)
         self.radioBtn_Despacho.setChecked(False)
         self.is_despacho = False
         self.radioBtn_Despacho.clearMask()
@@ -719,6 +743,7 @@ class Ui_MainWindow(object):
                                                   int(self.lineEdit_Telefono.text()),))
 
     def on_click_pagar(self):
+        # todo: revisar pago al registrarse
         if self.treeView_Venta.topLevelItemCount() > 0:
             if self.comboBox_Nombre.currentText() != "" \
                     and self.lineEdit_Direcion.text() != "" \
@@ -850,6 +875,7 @@ class Ui_MainWindow(object):
         self.load_buttons()
 
     def on_click_action_editar(self):
+        # todo: corregir índice de incersión y verificación del ítem
         current_index = self.treeView_Venta.currentIndex()
         if current_index.row() >= 0:
             current_item = self.treeView_Venta.currentItem()

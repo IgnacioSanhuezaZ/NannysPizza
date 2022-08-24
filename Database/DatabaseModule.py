@@ -136,7 +136,7 @@ def selectSesion(args, cursor, values=None):
     """
     try:
         sqlite_select_query = """SELECT * from Sesiones """
-        if args != "":
+        if args != "" and values:
             sqlite_select_query += args
             records = list(cursor.execute(sqlite_select_query, tuple(values)))
         else:
@@ -450,14 +450,14 @@ def GetPromocion(nombre_promocion):
     record = selectPromociones("WHERE Nombre_promocion = ?;", cursor, nombre_promocion)  # type: list
     for element in record:
         if 'Id_promocion' in element:
-            id_promocion = element['Id_promocion']
+            id_promocion = element['Nombre_promocion']
             print(id_promocion)
             componentes = selectComponentesPromociones("WHERE Id_promocion = ?", cursor, tuple((id_promocion,)))  # type: list
             for componente in componentes:
                 is_by_sub_cathegory = componente['Sub_categoria']
                 if is_by_sub_cathegory is None or is_by_sub_cathegory == "":
-                    nombre_producto = componente['Nombre_producto']
-                    producto = GetProduct(nombre_producto)[0]
+                    nombre_producto = componente['Nombre_Producto']
+                    producto = GetProduct((nombre_producto,))[0]
                     componente['Producto'] = producto
             element['Componentes'] = componentes
     print(record, "marca")
