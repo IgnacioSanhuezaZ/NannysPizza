@@ -8,7 +8,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QDialog
+from PyQt5.QtWidgets import QDialog, QMessageBox
 import Controller.ControlModule
 
 
@@ -43,7 +43,8 @@ class Ui_sub_cathegory_promo_select(QDialog):
         QtCore.QMetaObject.connectSlotsByName(Ui_sub_cathegory_promo_select)
 
         self.get_product_data()
-        print("de nuevo al setupUi()")
+
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(False)
 
     def retranslateUi(self, Ui_sub_cathegory_promo_select):
         _translate = QtCore.QCoreApplication.translate
@@ -51,21 +52,20 @@ class Ui_sub_cathegory_promo_select(QDialog):
 
     def get_product_data(self):
         if self.por_categoria:
-            data = Controller.ControlModule.get_Producto_by_Cathegory(self.nombre[0])
-            print(data, len(data), self.nombre)
+            data = Controller.ControlModule.get_Producto_by_Subcathegory(self.nombre[0])
             data = [elem['Nombre_producto'] for elem in data]
         else:
             data = self.nombre
-        print("pasamos")
         self.listProductos.addItems(data)
-        print("pasamos de nuevo")
 
     def On_product_list_double_click(self, index: QtCore.QModelIndex):
         text = self.listProductos.currentItem().text()
         if self.listSeleccion.count() < self.cantidad:
             self.listSeleccion.addItem(text)
+            if self.listSeleccion.count() == self.cantidad:
+                self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(True)
         else:
-            print("Ya está ingresada la cantidad suficiente de productos seleccionados")
+            QMessageBox.warning(self, "Aviso", "Ya está ingresada la cantidad suficiente de productos seleccionados")
 
     def On_selection_list_double_click(self, index: QtCore.QModelIndex):
         self.listSeleccion.takeItem(self.listSeleccion.currentIndex().row())

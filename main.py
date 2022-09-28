@@ -1,14 +1,7 @@
-import signal
 import sys
 
-# import PyQt5.uic.Compiler.compiler
-from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import (
-
-    QApplication, QDialog, QMainWindow, QMessageBox
-
-)
+from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QDialog, QMainWindow
 from PyQt5.uic import loadUi
 
 from inicio_session_dialogo import Ui_inicio_session
@@ -24,7 +17,7 @@ class Window(QMainWindow, Ui_inicio_session):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setupUi(self)
+        # self.setupUi(self)
         self.connectSignalsSlots()
 
     def connectSignalsSlots(self):
@@ -38,9 +31,7 @@ class Window(QMainWindow, Ui_inicio_session):
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
-        globals()['user_name'] = "test"
-        globals()['is_admin'] = False
-        self.loginForm()
+        # self.loginForm()
         # self.setupUi(self, user_name=globals()['user_name'], is_admin=globals()['is_admin'])
         self.connectSignalsSlots()
 
@@ -59,7 +50,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         globals()['access_token'] = dialog.ui.acces_token
         globals()['user_name'] = dialog.ui.user_name
         globals()['is_admin'] = dialog.ui.user_admin
-        print(globals().values())
 
 
 class FindReplaceDialog(QDialog):
@@ -69,22 +59,18 @@ class FindReplaceDialog(QDialog):
         loadUi("UI/Main_loged.ui", self)
 
 
-
-
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
+    MainWindow_obj = QtWidgets.QMainWindow()
     ui = MainWindow()
-    MainWindow = QtWidgets.QMainWindow()
-    if globals()['access_token'] is False:
-        print(globals()['user_name'], globals()['is_admin'], "En el MainWindow")
+    globals()['user_name'] = "test"
+    globals()['is_admin'] = False
+    globals()['access_token'] = None
+    ui.setupUi(MainWindow_obj, None, None)
+    ui.inicio_sesion()
+    if globals()['user_name'] != "test":
         app.exit(returnCode=1)
-        sys.exit()
-    ui.setupUi(MainWindow, globals()['user_name'], globals()['is_admin'])
-    MainWindow.show()
+        sys.exit(0)
+    # ui.setupUi(MainWindow, globals()['user_name'], globals()['is_admin'])
+    MainWindow_obj.show()
     sys.exit(app.exec())
-
-    # app = QApplication(sys.argv)
-    # win = MainWindow()
-    # win.show()
-    #
-    # sys.exit(app.exec())

@@ -16,7 +16,6 @@ def get_db():
     """Obtiene el conector desde la base de datos"""
     db = sqlite3.connect('nannys_pizza.sqlite', sqlite3.PARSE_DECLTYPES)
     db.row_factory = dict_factory
-    print("Conexión con la base de datos establecida")
     return db
 
 
@@ -24,7 +23,6 @@ def close_db(db):
     """Cierra la conexión a la base de datos"""
     if db is not None:
         db.close()
-        print("Conexión con base de datos cerrada")
 
 
 def Pragma_foreign_key_on(cursor):
@@ -170,7 +168,7 @@ def selectTurnos_caja(args, cursor, values=None):
 
 def selectVentas(args, cursor, values=None):
     """
-    Keys: Id_venta, Nombre_usuario, Nombre_cliente, Direccion_cliente, Id_sesion, Adicional
+    Keys: Id_venta, Nombre_usuario, Nombre_cliente, Direccion_cliente, Id_sesion, Adicional, Efectivo
     :param args:
     :param cursor:
     :param values:
@@ -238,7 +236,7 @@ def selectComponentesPromociones(args, cursor, values=None):
 
 def GetUser(user):
     cursor = get_db()
-    record = selectUser("WHERE Nombre_usuario = ?;", cursor, (user,))
+    record = selectUser("WHERE Nombre_usuario = ?;", cursor, tuple(user))
     cursor.close()
     return record
 
@@ -254,7 +252,7 @@ def GetClient(client):
 def GetClientPerNameOnly(client):
     """Keys: Nombre_cliente, Direccion, Sector, Telefono"""
     cursor = get_db()
-    record = selectClient("WHERE Nombre_cliente = ?;", cursor, tuple(client))
+    record = selectClient("WHERE Nombre_cliente LIKE ?;", cursor, tuple(client))
     cursor.close()
     return record
 
@@ -279,6 +277,14 @@ def GetProductBySubCathegory(product_key):
     """Keys: Nombre_producto, Precio_unitario, Categoria, Sub_categoria, Precio_mediana, Precio_familiar"""
     cursor = get_db()
     record = selectProducto("WHERE Sub_categoria = ?;", cursor, tuple(product_key))
+    cursor.close()
+    return record
+
+
+def GetProductByCathegory(product_key):
+    """Keys: Nombre_producto, Precio_unitario, Categoria, Sub_categoria, Precio_mediana, Precio_familiar"""
+    cursor = get_db()
+    record = selectProducto("WHERE Categoria = ?;", cursor, tuple(product_key))
     cursor.close()
     return record
 
@@ -324,12 +330,12 @@ def GetOneTurn(turn_key):
 
 
 def GetVentaPerKey(venta_key):
-    """Keys: Id_venta, Nombre_usuario, Nombre_cliente, Direccion_cliente, Id_sesion, Adicional"""
+    """Keys: Id_venta, Nombre_usuario, Nombre_cliente, Direccion_cliente, Id_sesion, Adicional, Efectivo"""
     cursor = get_db()
     record = selectVentas("WHERE Id_turno = ? AND Id_sesion = ?;", cursor, (venta_key,))  # type: dict
     for element in record:
-        if 'Id_boleta' in element:
-            id_boleta = element['Id_boleta']
+        if 'Id_venta' in element:
+            id_boleta = element['Id_venta']
             boleta = GetBoletas(id_boleta)  # type: dict
             for componente in boleta:
                 if 'Tamano' in componente:
@@ -351,12 +357,12 @@ def GetVentaPerKey(venta_key):
 
 
 def GetVentaPerClient(venta_key):
-    """Keys: Id_venta, Nombre_usuario, Nombre_cliente, Direccion_cliente, Id_sesion, Adicional"""
+    """Keys: Id_venta, Nombre_usuario, Nombre_cliente, Direccion_cliente, Id_sesion, Adicional, Efectivo"""
     cursor = get_db()
     record = selectVentas("WHERE Nombre_cliente = ? AND Direccion_cliente = ?;", cursor, tuple(venta_key))  # type: dict
     for element in record:
-        if 'Id_boleta' in element:
-            id_boleta = element['Id_boleta']
+        if 'Id_venta' in element:
+            id_boleta = element['Id_venta']
             boleta = GetBoletas(id_boleta)  # type: dict
             for componente in boleta:
                 if 'Tamano' in componente:
@@ -378,12 +384,12 @@ def GetVentaPerClient(venta_key):
 
 
 def GetLastNVentas(n):
-    """Keys: Id_venta, Nombre_usuario, Nombre_cliente, Direccion_cliente, Id_sesion, Adicional"""
+    """Keys: Id_venta, Nombre_usuario, Nombre_cliente, Direccion_cliente, Id_sesion, Adicional, Efectivo"""
     cursor = get_db()
     record = selectVentas("ORDER BY Id_venta DESC;", cursor)[:n]  # type: dict
     for element in record:
-        if 'Id_boleta' in element:
-            id_boleta = element['Id_boleta']
+        if 'Id_venta' in element:
+            id_boleta = element['Id_venta']
             boleta = GetBoletas(id_boleta)  # type: dict
             for componente in boleta:
                 if 'Tamano' in componente:
@@ -404,6 +410,83 @@ def GetLastNVentas(n):
     return record
 
 
+def GetVentasPerDates(date_1, date_2):
+    """Keys: Id_venta, Nombre_usuario, Nombre_cliente, Direccion_cliente, Id_sesion, Adicional, Efectivo"""
+    cursor = get_db()
+    sesiones = selectSesion("WHERE Fecha_apertura <= ? and Fecha_apertura >= ?", cursor, (date_1, date_2,))
+    if sesiones:
+        session_ids = []
+        for s in sesiones:
+            session_ids.append(s['Id_sesion'])
+        print(isinstance(int, (session_ids[0],)))
+        session_ids.sort()
+        values = (session_ids[0], session_ids[-1],)
+        record = selectVentas("WHERE Id_sesion <= ? and Id_sesion >= ? ORDER BY Id_sesion DESC;", cursor, values)
+        for element in record:
+            total = 0
+            if 'Id_venta' in element:
+                id_boleta = element['Id_venta']
+                boleta = GetBoletas(id_boleta)  # type: list
+                for componente in boleta:
+                    if 'Tamano' in componente:
+                        tamano = componente['Tamano']
+                    else:
+                        tamano = 1
+                    nombre_producto = componente['Nombre_producto']
+                    producto = GetProduct(nombre_producto)[0]
+                    if tamano == 1:
+                        precio = producto['Precio_unitario']
+                    elif tamano == 2:
+                        precio = producto['Precio_mediana']
+                    elif tamano == 3:
+                        precio = producto['Precio_familiar']
+                    componente['Precio'] = precio
+                    total += precio
+                element['Boleta'] = boleta
+                element['Precio_final'] = total
+        cursor.close()
+        return record
+    return []
+
+
+def GetVentasPerId(id):
+    """Keys: Id_venta, Nombre_usuario, Nombre_cliente, Direccion_cliente, Id_sesion, Adicional, Efectivo"""
+    cursor = get_db()
+    record = selectVentas("WHERE Id_sesion = ?", cursor, (id,))
+    total_final = 0
+    total_efectivo = 0
+    for element in record:
+        total = 0
+        if 'Id_venta' in element:
+            id_boleta = element['Id_venta']
+            boleta = GetBoletas(id_boleta)  # type: list
+            if element['Adicional'] >= 0:
+                for componente in boleta:
+                    if 'Tamano' in componente:
+                        tamano = componente['Tamano']
+                    else:
+                        tamano = 1
+                    nombre_producto = componente['Nombre_producto']
+                    producto = GetProduct(nombre_producto)[0]
+                    if tamano == 1:
+                        precio = producto['Precio_unitario']
+                    elif tamano == 2:
+                        precio = producto['Precio_mediana']
+                    elif tamano == 3:
+                        precio = producto['Precio_familiar']
+                    componente['Precio'] = precio
+                    total += precio
+                element['Boleta'] = boleta
+                element['Precio_final'] = total
+                if element['Efectivo'] == 1:
+                    total_efectivo += total
+            else:
+                total -= element['Adicional']
+                total_efectivo -= element['Adicional']
+    cursor.close()
+    return record, total_final, total_efectivo
+
+
 def GetLastNPromociones(n):
     """Keys: Id_promocion, Nombre_promocion, Is_by_sub_cathegory, precio, Tamano"""
     cursor = get_db()
@@ -411,7 +494,6 @@ def GetLastNPromociones(n):
     for element in record:
         if 'Id_promocion' in element:
             id_promocion = element['Id_promocion']
-            print(id_promocion)
             componentes = selectComponentesPromociones("WHERE Id_promocion = ?", cursor, (id_promocion,))  # type: list
             for componente in componentes:
                 is_by_sub_cathegory = componente['Sub_categoria']
@@ -431,7 +513,6 @@ def GetPromociones():
     for element in record:
         if 'Id_promocion' in element:
             id_promocion = element['Id_promocion']
-            print(id_promocion)
             componentes = selectComponentesPromociones("WHERE Id_promocion = ?", cursor, (id_promocion,))  # type: list
             for componente in componentes:
                 is_by_sub_cathegory = componente['Sub_categoria']
@@ -451,8 +532,8 @@ def GetPromocion(nombre_promocion):
     for element in record:
         if 'Id_promocion' in element:
             id_promocion = element['Nombre_promocion']
-            print(id_promocion)
-            componentes = selectComponentesPromociones("WHERE Id_promocion = ?", cursor, tuple((id_promocion,)))  # type: list
+            componentes = selectComponentesPromociones("WHERE Id_promocion = ?", cursor,
+                                                       tuple((id_promocion,)))  # type: list
             for componente in componentes:
                 is_by_sub_cathegory = componente['Sub_categoria']
                 if is_by_sub_cathegory is None or is_by_sub_cathegory == "":
@@ -460,7 +541,6 @@ def GetPromocion(nombre_promocion):
                     producto = GetProduct((nombre_producto,))[0]
                     componente['Producto'] = producto
             element['Componentes'] = componentes
-    print(record, "marca")
     cursor.close()
     return record[:1]
 
@@ -472,8 +552,8 @@ def GetComponentesPromocion(Id_promocion):
     for element in record:
         if 'Id_promocion' in element:
             id_promocion = element['Id_promocion']
-            print(id_promocion)
-            componentes = selectComponentesPromociones("WHERE Id_promocion = ?", cursor, tuple((id_promocion,)))  # type: list
+            componentes = selectComponentesPromociones("WHERE Id_promocion = ?", cursor,
+                                                       tuple((id_promocion,)))  # type: list
             for componente in componentes:
                 is_by_sub_cathegory = componente['Sub_categoria']
                 if is_by_sub_cathegory is None or is_by_sub_cathegory == "":
@@ -481,7 +561,6 @@ def GetComponentesPromocion(Id_promocion):
                     producto = GetProduct(nombre_producto)[0]
                     componente['Producto'] = producto
             element['Componentes'] = componentes
-    print(record, "marca")
     cursor.close()
     return record[:1]
 
@@ -495,6 +574,7 @@ def ExistComponentesPromocion(values_componente):
     if record:
         return record[0]['Id_componente']
     return None
+
 
 """---------------------------------------------------------------------------------
                                 Inserción de datos
@@ -547,8 +627,8 @@ def insertProduct(values, cursor):
 
 
 def insertSesion(values, cursor):
-    """Keys: Id_sesion, Nombre_usuario (fk_Usuarios), Cerrado, Fecha_apertura, Fecha_cierre, Apertura_caja"""
-    query = """INSERT INTO Sesiones (Id_sesion, Nombre_usuario, Cerrado, Fecha_apertura, Fecha_cierre, Apertura_caja)\
+    """Keys: Nombre_usuario (fk_Usuarios), Cerrado, Fecha_apertura, Fecha_cierre, Apertura_caja"""
+    query = """INSERT INTO Sesiones (Nombre_usuario, Cerrado, Fecha_apertura, Fecha_cierre, Apertura_caja, monto_cierre)\
     VALUES (?, ?, ?, ?, ?, ?);"""
     try:
         cursor.execute(query, tuple(values))
@@ -559,8 +639,8 @@ def insertSesion(values, cursor):
 
 
 def insertTurnos_caja(values, cursor):
-    """Keys: Id_turno, Id_sesion (fk_Sesiones), Nombre_usuario (fk_Usuarios)"""
-    query = """INSERT INTO Turnos_caja (Id_turno, Id_sesion, Nombre_usuario) VALUES (?, ?, ?);"""
+    """Keys: Id_sesion (fk_Sesiones), Nombre_usuario (fk_Usuarios)"""
+    query = """INSERT INTO Turnos_caja (Id_sesion, Nombre_usuario) VALUES (?, ?, ?);"""
     try:
         cursor.execute(query, tuple(values))
         cursor.commit()
@@ -570,10 +650,10 @@ def insertTurnos_caja(values, cursor):
 
 
 def insertVenta(values, cursor):
-    """Keys: Id_venta, Nombre_usuario (fk_Usuarios), Nombre_cliente (fk_Clientes),
-        Direccion_cliente (fk_Clientes), Id_sesion (fk_Sesiones)"""
-    query = """INSERT INTO Ventas (Nombre_usuario, Nombre_cliente, Direccion_cliente, Id_sesion)\
-     VALUES (?, ?, ?, ?);"""
+    """Keys: Nombre_usuario (fk_Usuarios), Nombre_cliente (fk_Clientes),
+        Direccion_cliente (fk_Clientes), Id_sesion (fk_Sesiones), Adicional, Efectivo"""
+    query = """INSERT INTO Ventas (Nombre_usuario, Nombre_cliente, Direccion_cliente, Id_sesion, Adicional, Efectivo)\
+     VALUES (?, ?, ?, ?, ?, ?);"""
     try:
         cursor.execute(query, tuple(values))
         cursor.commit()
@@ -622,12 +702,11 @@ def updateUser(cursor, values):
     :return: None
     """
     query = """UPDATE Usuarios 
-                SET Nombre_usuario = ? ,
-                    Contrasena = ?,
+                SET Contrasena = ?,
                     Administra = ?
                 WHERE Nombre_usuario = ?;"""
     try:
-        if len(values) != 4:
+        if len(values) != 3:
             print("Wrong amount of parameters!")
             raise sqlite3.Error
         else:
@@ -636,6 +715,29 @@ def updateUser(cursor, values):
             print("Table Usuarios successfully updated")
     except sqlite3.Error as error:
         print("Failed to update data from table", error)
+        return error
+
+
+def eraseUser(cursor, values):
+    """
+    Keys: Nombre_usuario, Contrasena, Administra
+
+    :param cursor: sqlite3 database cursor
+    :param values: tuple(Nombre_usuario, Contrasena, Administra, Nombre_usuario)
+    :return: None
+    """
+    query = """DELETE FROM Usuarios 
+                WHERE Nombre_usuario = ?;"""
+    try:
+        if len(values) != 1:
+            print("Wrong amount of parameters!")
+            raise sqlite3.Error
+        else:
+            cursor.execute(query, tuple(values))
+            cursor.commit()
+            print("Table Usuarios successfully updated")
+    except sqlite3.Error as error:
+        print("Failed to update data from table Usuarios", error)
 
 
 def updateCliente(cursor, values):
@@ -723,15 +825,16 @@ def updateSesiones(cursor, values):
     Keys: Id_sesion, Nombre_usuario (fk_Usuarios), Cerrado, Fecha_apertura, Fecha_cierre, Apertura_caja
 
     :param cursor: sqlite3 database cursor
-    :param values: tuple(Nombre_usuario, Cerrado, Fecha_apertura, Fecha_cierre, Apertura_caja, Id_sesion)
+    :param values: tuple(Nombre_usuario, Cerrado, Fecha_apertura, Fecha_cierre, Apertura_caja, monto_cierre, Id_sesion)
     :return: None
     """
     query = """UPDATE Sesiones 
                 SET Nombre_usuario = ?,
-                    Cerrado = ?
+                    Cerrado = ?,
                     Fecha_apertura = ?,
                     Fecha_cierre = ?,
                     Apertura_caja = ?,
+                    monto_cierre = ?
                 WHERE Id_sesion = ?;"""
     try:
         if len(values) != 6:
@@ -825,17 +928,18 @@ def updateTurnos_caja(cursor, values):
 def updateVentas(cursor, values):
     """
     Keys: Id_venta, Nombre_usuario (fk_Usuarios), Nombre_cliente (fk_Clientes),
-        Direccion_cliente (fk_Clientes), Id_sesion (fk_Sesiones)
+        Direccion_cliente (fk_Clientes), Id_sesion (fk_Sesiones), Efectivo
 
     :param cursor: sqlite3 database cursor
-    :param values: tuple(Nombre_usuario, Nombre_cliente, Direccion_cliente, Id_sesio, Id_venta)
+    :param values: tuple(Nombre_usuario, Nombre_cliente, Direccion_cliente, Id_sesio, Efectivo, Id_venta)
     :return: None
     """
     query = """UPDATE Ventas 
                 SET Nombre_usuario = ?,
                     Nombre_cliente = ?,
                     Direccion_cliente = ?,
-                    Id_sesio = ?
+                    Id_sesio = ?,
+                    Efectivo = ?
                 WHERE Id_venta = ?;"""
     try:
         if len(values) != 5:

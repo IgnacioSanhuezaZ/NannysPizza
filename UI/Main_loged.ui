@@ -528,9 +528,18 @@
     <addaction name="menuEditar_productos"/>
     <addaction name="menuEditar_promociones"/>
    </widget>
+   <widget class="QMenu" name="menuBolet_n">
+    <property name="title">
+     <string>Administrar finanzas</string>
+    </property>
+    <addaction name="actionGenerar_bolet_n_de_ventas_del_d_a"/>
+    <addaction name="actionGenerar_bolet_n_de_ventas_del_mes"/>
+    <addaction name="actionGenerar_bolet_n_de_ventas_del_total"/>
+   </widget>
    <addaction name="menuAdministrar_Sesion"/>
    <addaction name="menuAdministrar_usuarios"/>
    <addaction name="menuEditar"/>
+   <addaction name="menuBolet_n"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionIniciar_Sesion">
@@ -608,9 +617,22 @@
     <string>Eliminar un producto</string>
    </property>
   </action>
+  <action name="actionGenerar_bolet_n_de_ventas_del_d_a">
+   <property name="text">
+    <string>Generar boletín de ventas del día</string>
+   </property>
+  </action>
+  <action name="actionGenerar_bolet_n_de_ventas_del_mes">
+   <property name="text">
+    <string>Generar boletín de ventas del mes</string>
+   </property>
+  </action>
+  <action name="actionGenerar_bolet_n_de_ventas_del_total">
+   <property name="text">
+    <string>Generar boletín de ventas del total</string>
+   </property>
+  </action>
  </widget>
- <resources>
-  <include location="D:/ignac/Documents/PY PIZZA/NanysPizza/Resources/sources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
