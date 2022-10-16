@@ -1035,7 +1035,6 @@ class Ui_MainWindow(object):
                                                 "Ingrese un nombre y una dirección válida.")
 
     def on_click_pagar(self):
-        # todo: agregar al inicio los datos del cliente
         def item_childs_to_dict(item):
             result = []
             for j in range(0, item.childCount()):
