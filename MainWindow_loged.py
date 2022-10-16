@@ -1061,9 +1061,9 @@ class Ui_MainWindow(object):
                     and self.lineEdit_Telefono.text() != "" \
                     and ControlModule.get_Cliente(self.comboBox_Nombre.currentText(), self.lineEdit_Direcion.text()):
                 inofrmaion_cliente = {
-                    "nombre: ", self.comboBox_Nombre.currentText(),
-                    "direccion: ", self.lineEdit_Direcion.text(),
-                    "telefono: ", self.lineEdit_Telefono.text(),
+                    "nombre": self.comboBox_Nombre.currentText(),
+                    "direccion": self.lineEdit_Direcion.text(),
+                    "telefono": self.lineEdit_Telefono.text(),
                 }
                 if self.is_despacho or self.is_pedidos_ya:
                     nombre_zona = self.cmb_zona_cliente.currentText()
