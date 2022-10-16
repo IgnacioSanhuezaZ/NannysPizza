@@ -1,5 +1,4 @@
 PyQt5==5.15.7
-escpos==1.9
 numpy==1.23.3
 pip==22.2.2
 argparse==1.4.0

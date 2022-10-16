@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
-import datetime
-import time
 # Form implementation generated from reading ui file '.\UI\Main_loged.ui'
 #
 # Created by: PyQt5 UI code generator 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
-from binhex import openrsrc
+import sys
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QModelIndex
@@ -23,21 +21,26 @@ from Eliminar_usuario_Dialog import Ui_Dialog as Ui_Eliminar_Usuario_Dialog
 from añadir_comentario_Dialog import Ui_Dialog as Ui_añadir_comentario
 from añadir_ingrediente_Dialog import Ui_Dialog as Ui_añadir_ingrediente
 from Aniadir_retiro_Dialog import Ui_Dialog as Ui_Aniadir_Retiro_Dialog
+from Export_boletin_fechas_Dialog import Ui_Dialog as UI_Export_Boletin_Fechas_Dialog
 from Controller import ControlModule
 
-# import numpy as np
 from numpy import genfromtxt
+import datetime
 
 
 class Ui_MainWindow(object):
 
     def setupUi(self, MainWindow, user_name, is_admin):
+        self.MainWindow = MainWindow
         self.user_name = user_name
         self.is_admin = is_admin
         self.caja_abierta = False
         self.id_session = None
         self.boleta = None
         self.promociones = None
+        self.nombre_cliente = None
+        self.is_despacho = False
+        self.is_pedidos_ya = False
         self.clientes_en_memoria = {}
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1239, 815)
@@ -59,7 +62,7 @@ class Ui_MainWindow(object):
         self.label_2 = QtWidgets.QLabel(self.verticalLayoutWidget)
         self.label_2.setObjectName("label_2")
         self.horizontalLayout.addWidget(self.label_2)
-        self.comboBox_Nombre = QtWidgets.QComboBox(self.verticalLayoutWidget)
+        self.comboBox_Nombre = CustomCombo(self.verticalLayoutWidget)
         self.comboBox_Nombre.setEditable(True)
         self.comboBox_Nombre.setMaxVisibleItems(30)
         self.comboBox_Nombre.setObjectName("comboBox_Nombre")
@@ -110,9 +113,6 @@ class Ui_MainWindow(object):
         self.cmb_zona_cliente = QtWidgets.QComboBox(self.verticalLayoutWidget_2)
         self.cmb_zona_cliente.setEnabled(True)
         self.cmb_zona_cliente.setObjectName("cmb_zona_cliente")
-        self.cmb_zona_cliente.addItem("")
-        self.cmb_zona_cliente.addItem("")
-        self.cmb_zona_cliente.addItem("")
         self.horizontalLayout_8.addWidget(self.cmb_zona_cliente)
         self.verticalLayout.addLayout(self.horizontalLayout_8)
         self.horizontalLayout_7 = QtWidgets.QHBoxLayout()
@@ -255,6 +255,8 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
         self.actionIniciar_Sesion = QtWidgets.QAction(MainWindow)
         self.actionIniciar_Sesion.setObjectName("actionIniciar_Sesion")
+        self.actionIngresarRetiro = QtWidgets.QAction(MainWindow)
+        self.actionIngresarRetiro.setObjectName("actionIngresarRetiro")
         self.actionCerrar_caja = QtWidgets.QAction(MainWindow)
         self.actionCerrar_caja.setObjectName("actionCerrar_caja")
         self.actionCerrar_sesion = QtWidgets.QAction(MainWindow)
@@ -296,6 +298,8 @@ class Ui_MainWindow(object):
         self.menuAdministrar_Sesion.addSeparator()
         self.menuAdministrar_Sesion.addAction(self.actionAbrir_caja)
         self.menuAdministrar_Sesion.addAction(self.actionCerrar_caja)
+        self.menuAdministrar_Sesion.addSeparator()
+        self.menuAdministrar_Sesion.addAction(self.actionIngresarRetiro)
         self.menuAdministrar_usuarios.addAction(self.actionCrear_usuario)
         self.menuAdministrar_usuarios.addAction(self.actionModificar_usuario)
         self.menuAdministrar_usuarios.addAction(self.actionEliminar_usuario)
@@ -352,6 +356,8 @@ class Ui_MainWindow(object):
         self.actionCrear_usuario.triggered.connect(self.crear_usuario)
         self.actionModificar_usuario.triggered.connect(self.modificar_usuario)
         self.actionEliminar_usuario.triggered.connect(self.eliminar_usuario)
+        self.actionIngresarRetiro.triggered.connect(self.registrar_Retiro)
+        self.actionGenerar_bolet_n_de_ventas_del_total.triggered.connect(self.on_click_action_boletin_fechas)
         self.radioBtn_Despacho.clicked.connect(self.on_click_Despacho_RButton)
         self.radioBtn_Pedidos_Ya.clicked.connect(self.on_click_PedidosYa_RButton)
         self.listPizzas.doubleClicked.connect(self.on_double_click_Pizzas)
@@ -361,7 +367,9 @@ class Ui_MainWindow(object):
         self.listPromociones.doubleClicked.connect(self.on_double_click_Promociones)
         self.treeView_Venta.doubleClicked.connect(self.On_ventas_tree_double_click)
         self.pushButton_Buscar_cliente.clicked.connect(self.on_click_buscar)
+        self.comboBox_Nombre.enter_pressed.connect(self.on_click_buscar)
         self.comboBox_Nombre.currentIndexChanged.connect(self.on_index_change_nombre)
+        self.cmb_zona_cliente.currentIndexChanged.connect(self.on_zone_change)
         self.pushButton_Crear_cliente.clicked.connect(self.on_click_crear)
         self.pushButton_Pagar.clicked.connect(self.on_click_pagar)
         self.radioBtn_ClearSelection = QtWidgets.QRadioButton(self.verticalLayoutWidget_2)
@@ -372,8 +380,6 @@ class Ui_MainWindow(object):
         self.load_tree()
         self.tabWidget.setCurrentIndex(0)
         self.radioButton_individual.setChecked(True)
-        self.is_despacho = False
-        self.is_pedidos_ya = False
         self.configure_enabling()
 
     def retranslateUi(self, MainWindow):
@@ -386,9 +392,6 @@ class Ui_MainWindow(object):
         self.pushButton_Buscar_cliente.setText(_translate("MainWindow", "Buscar"))
         self.pushButton_Crear_cliente.setText(_translate("MainWindow", "Crear"))
         self.label_7.setText(_translate("MainWindow", "Zona"))
-        self.cmb_zona_cliente.setItemText(0, _translate("MainWindow", "1: Cuidad Satélite"))
-        self.cmb_zona_cliente.setItemText(1, _translate("MainWindow", "2: Padre Hurtado y otros"))
-        self.cmb_zona_cliente.setItemText(2, _translate("MainWindow", "3: Más allá"))
         self.radioBtn_Pedidos_Ya.setText(_translate("MainWindow", "Pedidos Ya!"))
         self.radioBtn_Despacho.setText(_translate("MainWindow", "Despacho"))
         self.radioButton_individual.setText(_translate("MainWindow", "Individual"))
@@ -405,7 +408,7 @@ class Ui_MainWindow(object):
         self.treeView_Venta.headerItem().setText(1, _translate("MainWindow", "Detalle"))
         self.treeView_Venta.headerItem().setText(2, _translate("MainWindow", "Cobros extra"))
         self.label_5.setText(_translate("MainWindow", "Total:"))
-        self.lineEdit_Total.setText(_translate("MainWindow", "12.990"))
+        self.lineEdit_Total.setText(_translate("MainWindow", "0"))
         self.menuAdministrar_Sesion.setTitle(_translate("MainWindow", "Administrar Sesión"))
         self.menuAdministrar_usuarios.setTitle(_translate("MainWindow", "Administrar usuarios"))
         self.menuEditar.setTitle(_translate("MainWindow", "Editar"))
@@ -436,6 +439,8 @@ class Ui_MainWindow(object):
             _translate("MainWindow", "Generar boletín de ventas del mes"))
         self.actionGenerar_bolet_n_de_ventas_del_total.setText(
             _translate("MainWindow", "Generar boletín de ventas por fechas"))
+        self.actionIngresarRetiro.setText(
+            _translate("MainWindow", "Ingresar retiro"))
 
     def block_unblock_all(self, operation):
         self.centralwidget.setEnabled(operation)
@@ -480,6 +485,8 @@ class Ui_MainWindow(object):
         self.actionCerrar_sesion.setEnabled(operation)
         self.menuAdministrar_usuarios.setEnabled(operation)
         self.menuEditar.setEnabled(operation)
+        self.menuBolet_n.setEnabled(operation)
+        self.actionIngresarRetiro.setEnabled(operation)
 
     def configure_enabling(self):
         if self.user_name is None or self.user_name == "":
@@ -565,17 +572,19 @@ class Ui_MainWindow(object):
     def abrir_caja(self):
         last_session = ControlModule.getLastSession()
         if last_session:
-            id = last_session[0]['Id_sesion']
-            if last_session[0]['Cerrado'] == 1:
+            id = last_session['Id_sesion']
+            if last_session['Cerrado'] == 1:
                 """Nombre_usuario (fk_Usuarios), Cerrado, Fecha_apertura, Fecha_cierre, Apertura_caja, monto_cierre"""
                 nombre = globals()['user_name']
                 cerrado = 0
-                fecha_apertura = datetime.datetime.now().date()
-                apertura_caja = last_session[0]['monto_cierre']
+                fecha_apertura = datetime.datetime.now().date().isoformat().split("-")
+                fecha_apertura = fecha_apertura[0] + fecha_apertura[1] + fecha_apertura[2]
+                fecha_apertura = int(fecha_apertura)
+                apertura_caja = last_session['monto_cierre']
                 values = [nombre, cerrado, fecha_apertura, None, apertura_caja, None]
                 ControlModule.set_session(values)
-                """Keys: Id_sesion (fk_Sesiones), Nombre_usuario (fk_Usuarios)"""
                 id += 1
+                """Keys: Id_sesion (fk_Sesiones), Nombre_usuario (fk_Usuarios)"""
                 values = [id, nombre]
                 ControlModule.set_turno(values)
             else:
@@ -586,53 +595,69 @@ class Ui_MainWindow(object):
             self.caja_abierta = True
             self.actionCerrar_caja.setEnabled(True)
             self.actionAbrir_caja.setEnabled(False)
+        else:
+            if 'user_name' not in globals():
+                self.inicio_sesion()
+                if 'user_name' not in globals():
+                    self.MainWindow.close()
+                    sys.exit(0)
+            nombre = globals()['user_name']
+            cerrado = 0
+            fecha_apertura = datetime.datetime.now().date().isoformat().split("-")
+            fecha_apertura = fecha_apertura[0] + fecha_apertura[1] + fecha_apertura[2]
+            fecha_apertura = int(fecha_apertura)
+            apertura_caja = 0
+            values = [nombre, cerrado, fecha_apertura, None, apertura_caja, None]
+            ControlModule.set_session(values)
+    def registrar_Retiro(self):
+        dialog = QDialog()
+        dialog.ui = Aniadir_Retiro_Dialog()
+        dialog.ui.setupUi(dialog)
+        rec = dialog.exec()
 
     def cerrar_caja(self):
         last_session = ControlModule.getLastSession()
         if last_session:
-            id = last_session[0]['Id_sesion']
+            id = last_session['Id_sesion']
             dialog = QtWidgets.QMessageBox
             ret = dialog.question(self, "Cierre de caja", '¿Desea ingresar retiros de efectivo?',
                                   dialog.Ok | dialog.No)
             if ret == dialog.Ok:
-                dialog = QDialog()
-                dialog.ui = Aniadir_Retiro_Dialog()
-                dialog.ui.setupUi(dialog)
-                rec = dialog.exec()
-                if rec == dialog.Accepted:
-                    """Keys: (Nombre_usuario, Nombre_cliente, Direccion_cliente, Id_sesion, Adicional, Efectivo)"""
-                    nombre = "Admin"
-                    cli = "Salida de dinero"
-                    dir = "Autorización del Admin"
-                    efectivo = 1
-                    values = [nombre, cli, dir, id, int(dialog.ui.lineEdit.text()), efectivo]
-                    ControlModule.set_retiro(values)
-            if last_session[0]['Cerrado'] == 0:
+                self.registrar_Retiro()
+            if last_session['Cerrado'] == 0:
                 """tuple(Nombre_usuario, Cerrado, Fecha_apertura, Fecha_cierre, Apertura_caja, monto_cierre, Id_sesion)"""
                 nombre = globals()['user_name']
                 cerrado = 1
-                fecha_apertura = last_session[0]['Fecha_apertura']
-                fecha_cierre = datetime.datetime.now().date()
-                apertura_caja = last_session[0]['Apertura_caja']
-                rec, total, efectivo = ControlModule.Calculate_end_session(id)
+                fecha_apertura = last_session['Fecha_apertura']
+                fecha_cierre = datetime.datetime.now().date().isoformat().split("-")
+                fecha_cierre = fecha_cierre[0] + fecha_cierre[1] + fecha_cierre[2]
+                fecha_cierre = int(fecha_cierre)
+                apertura_caja = last_session['Apertura_caja']
+                rec, ret, total, efectivo = ControlModule.Calculate_end_session(id)
                 monto_cierre = apertura_caja + efectivo
-                values = [nombre, cerrado, fecha_apertura, None, apertura_caja, id]
-                ControlModule.update_session()
+                """tuple(Nombre_usuario, Cerrado, Fecha_apertura, Fecha_cierre, Apertura_caja, monto_cierre, Id_sesion)"""
+                values = [nombre, cerrado, fecha_apertura, fecha_cierre, apertura_caja, monto_cierre, id]
+                ControlModule.update_session(values)
                 self.id_session = None
                 self.caja_abierta = False
-                self.actionCerrar_caja.setEnabled(False)
+                self.user_name = None
+                self.is_admin = False
+                self.configure_enabling()
                 self.actionAbrir_caja.setEnabled(True)
             else:
-                pass
+                self.caja_abierta = False
+                self.cierre_sesion()
+                self.actionAbrir_caja.setEnabled(True)
+                self.actionCerrar_caja.setEnabled(False)
 
     def get_info_last_sesion(self):
         last_session = ControlModule.getLastSession()  # type: list
-        if last_session and 'Fecha_cierre' in last_session[0]:
-            if last_session[0]['Fecha_cierre'] is None:
+        if last_session and 'Fecha_cierre' in last_session:
+            if last_session['Fecha_cierre'] is None:
                 self.caja_abierta = True
             else:
                 self.caja_abierta = False
-            self.id_session = last_session[0]['Id_sesion']
+            self.id_session = last_session['Id_sesion']
 
     def on_change_tree(self):
         total = 0
@@ -665,37 +690,59 @@ class Ui_MainWindow(object):
                 precio = prod[0]['Precio_familiar']
                 tamano = "Precio_familiar"
                 tamano_str = " Familiar"
-            item = QtWidgets.QTreeWidgetItem(self.treeView_Venta)
-            item.setText(0, nombre_producto + tamano_str)
-            if precio is None:
-                precio = 0
-            item.setText(1, str(precio))
-            item.setText(3, tamano)
-            self.treeView_Venta.addTopLevelItem(item)
+            es_cuatro_estaciones = False
             if nombre_producto == 'Cuatro Estaciones':
-                self.cuatro_estaciones(item)
-            self.treeView_Venta.expandAll()
-            self.on_change_tree()
+                es_cuatro_estaciones = True
+                rec, nombres_a_agregar = self.cuatro_estaciones()
+            if (es_cuatro_estaciones and rec == 1) or not es_cuatro_estaciones:
+                if self.is_despacho or self.is_pedidos_ya:
+                    despacho_item = self.treeView_Venta.takeTopLevelItem(self.treeView_Venta.topLevelItemCount()-1)
+                else:
+                    despacho_item = None
+                item = QtWidgets.QTreeWidgetItem(self.treeView_Venta)
+                if es_cuatro_estaciones:
+                    for e in nombres_a_agregar:
+                        new_item = QtWidgets.QTreeWidgetItem(item)
+                        new_item.setText(1, e)
+                        item.addChild(new_item)
+                item.setText(0, nombre_producto + " - " + tamano_str)
+                if precio is None:
+                    precio = 0
+                item.setText(1, str(precio))
+                item.setText(3, tamano)
+                self.treeView_Venta.addTopLevelItem(item)
+                if despacho_item:
+                    item_despacho = QtWidgets.QTreeWidgetItem(self.treeView_Venta)
+                    item_despacho.setText(0, despacho_item.text(0))
+                    item_despacho.setText(1, despacho_item.text(1))
+                    self.treeView_Venta.addTopLevelItem(item_despacho)
+                    del despacho_item
+                self.treeView_Venta.expandAll()
+                self.on_change_tree()
 
-    def cuatro_estaciones(self, item):
+    def cuatro_estaciones(self):
         nombres = ['Champiñon', 'Jardinera', 'Española', 'Italiana']
         dialog = QDialog()
         dialog.ui = Select_promo_component()
         dialog.ui.setupUi(dialog, nombre=nombres, cantidad=4, por_categoria=False)
         dialog.setWindowTitle("Escoja el producto de la promoción")
         rec = dialog.exec()
+        out = []
         if rec == 1:
             for i in range(dialog.ui.listSeleccion.count()):
                 name_item = dialog.ui.listSeleccion.item(i)
-                new_item = QtWidgets.QTreeWidgetItem(item)
-                new_item.setText(1, name_item.text())
-                item.addChild(new_item)
+                out.append(name_item.text())
+        return rec, out
 
     def on_double_click_Agregados(self, index: QModelIndex):
         nombre_producto = self.listAgregados.item(index.row()).text()
         prod = ControlModule.get_Producto(nombre_producto)
         if prod:
             precio = prod[0]['Precio_unitario']
+            if self.is_despacho or self.is_pedidos_ya:
+                despacho_item = self.treeView_Venta.takeTopLevelItem(self.treeView_Venta.topLevelItemCount()-1)
+            else:
+                despacho_item = None
             item = QtWidgets.QTreeWidgetItem(self.treeView_Venta)
             item.setText(0, nombre_producto)
             if precio is None:
@@ -703,6 +750,12 @@ class Ui_MainWindow(object):
             item.setText(1, str(precio))
             item.setText(3, "Precio_unitario")
             self.treeView_Venta.addTopLevelItem(item)
+            if despacho_item:
+                item_despacho = QtWidgets.QTreeWidgetItem(self.treeView_Venta)
+                item_despacho.setText(0, despacho_item.text(0))
+                item_despacho.setText(1, despacho_item.text(1))
+                self.treeView_Venta.addTopLevelItem(item_despacho)
+                del despacho_item
             self.treeView_Venta.expandAll()
             self.on_change_tree()
 
@@ -711,6 +764,10 @@ class Ui_MainWindow(object):
         prod = ControlModule.get_Producto(nombre_producto)
         if prod:
             precio = prod[0]['Precio_unitario']
+            if self.is_despacho or self.is_pedidos_ya:
+                despacho_item = self.treeView_Venta.takeTopLevelItem(self.treeView_Venta.topLevelItemCount()-1)
+            else:
+                despacho_item = None
             item = QtWidgets.QTreeWidgetItem(self.treeView_Venta)
             item.setText(0, nombre_producto)
             if precio is None:
@@ -718,6 +775,12 @@ class Ui_MainWindow(object):
             item.setText(1, str(precio))
             item.setText(3, "Precio_unitario")
             self.treeView_Venta.addTopLevelItem(item)
+            if despacho_item:
+                item_despacho = QtWidgets.QTreeWidgetItem(self.treeView_Venta)
+                item_despacho.setText(0, despacho_item.text(0))
+                item_despacho.setText(1, despacho_item.text(1))
+                self.treeView_Venta.addTopLevelItem(item_despacho)
+                del despacho_item
             self.treeView_Venta.expandAll()
             self.on_change_tree()
 
@@ -726,6 +789,10 @@ class Ui_MainWindow(object):
         prod = ControlModule.get_Producto(nombre_producto)
         if prod:
             precio = prod[0]['Precio_unitario']
+            if self.is_despacho or self.is_pedidos_ya:
+                despacho_item = self.treeView_Venta.takeTopLevelItem(self.treeView_Venta.topLevelItemCount()-1)
+            else:
+                despacho_item = None
             item = QtWidgets.QTreeWidgetItem(self.treeView_Venta)
             item.setText(0, nombre_producto)
             if precio is None:
@@ -733,6 +800,12 @@ class Ui_MainWindow(object):
             item.setText(1, str(precio))
             item.setText(3, "Precio_unitario")
             self.treeView_Venta.addTopLevelItem(item)
+            if despacho_item:
+                item_despacho = QtWidgets.QTreeWidgetItem(self.treeView_Venta)
+                item_despacho.setText(0, despacho_item.text(0))
+                item_despacho.setText(1, despacho_item.text(1))
+                self.treeView_Venta.addTopLevelItem(item_despacho)
+                del despacho_item
             self.treeView_Venta.expandAll()
             self.on_change_tree()
 
@@ -774,6 +847,10 @@ class Ui_MainWindow(object):
                         tamano_str = ""
                     items_a_ingresar += [e + tamano_str for e in dialog.ui.nombre]
 
+            if self.is_despacho or self.is_pedidos_ya:
+                despacho_item = self.treeView_Venta.takeTopLevelItem(self.treeView_Venta.topLevelItemCount()-1)
+            else:
+                despacho_item = None
             item = QtWidgets.QTreeWidgetItem(self.treeView_Venta)
             item.setText(0, "Promoción: " + nombre_promocion)
             if precio is None:
@@ -785,54 +862,124 @@ class Ui_MainWindow(object):
                 sub_item.setText(1, nombre)
                 item.addChild(sub_item)
             self.treeView_Venta.addTopLevelItem(item)
+            if despacho_item:
+                item_despacho = QtWidgets.QTreeWidgetItem(self.treeView_Venta)
+                item_despacho.setText(0, despacho_item.text(0))
+                item_despacho.setText(1, despacho_item.text(1))
+                self.treeView_Venta.addTopLevelItem(item_despacho)
+                del despacho_item
             self.treeView_Venta.expandAll()
             self.on_change_tree()
 
     def On_ventas_tree_double_click(self, index: QtCore.QModelIndex):
+        if self.is_despacho or self.is_pedidos_ya:
+            if index.row() == self.treeView_Venta.topLevelItemCount()-1:
+                return
         self.treeView_Venta.takeTopLevelItem(index.row())
         self.on_change_tree()
 
+    def on_zone_change(self):
+        new_zone = self.cmb_zona_cliente.currentText()
+        despachos = ControlModule.get_Producto(new_zone)
+        if self.is_despacho:
+            precio = despachos[0]['Precio_unitario']
+            self.treeView_Venta.topLevelItem(self.treeView_Venta.topLevelItemCount()-1).setText(0, "Despacho: " + new_zone)
+            self.treeView_Venta.topLevelItem(self.treeView_Venta.topLevelItemCount()-1).setText(1, str(precio))
+            self.on_change_tree()
+
     def on_click_Despacho_RButton(self):
-        # todo: agregar valor despacho a la boleta
         if self.is_despacho:
             if self.radioBtn_Despacho.isChecked():
                 self.is_despacho = False
+                self.treeView_Venta.takeTopLevelItem(self.treeView_Venta.topLevelItemCount()-1)
+                self.on_change_tree()
                 self.radioBtn_Despacho.setChecked(False)
                 self.radioBtn_ClearSelection.setChecked(True)
             else:
                 self.is_despacho = True
+                nombre_zona = self.cmb_zona_cliente.currentText()
+                zona = ControlModule.get_Producto(nombre_zona)
+                if zona:
+                    precio_despacho = zona[0]['Precio_unitario']
+                    if self.is_pedidos_ya:
+                        self.treeView_Venta.takeTopLevelItem(self.treeView_Venta.topLevelItemCount() - 1)
+                    item = QtWidgets.QTreeWidgetItem(self.treeView_Venta)
+                    item.setText(0, "Despacho: " + nombre_zona)
+                    item.setText(1, str(precio_despacho))
+                    self.treeView_Venta.addTopLevelItem(item)
+                    self.on_change_tree()
                 self.radioBtn_Despacho.setChecked(True)
         else:
             self.is_despacho = True
+            nombre_zona = self.cmb_zona_cliente.currentText()
+            zona = ControlModule.get_Producto(nombre_zona)
+            if zona:
+                precio_despacho = zona[0]['Precio_unitario']
+                if self.is_pedidos_ya:
+                    self.treeView_Venta.takeTopLevelItem(self.treeView_Venta.topLevelItemCount() - 1)
+                item = QtWidgets.QTreeWidgetItem(self.treeView_Venta)
+                item.setText(0, "Despacho: " + nombre_zona)
+                item.setText(1, str(precio_despacho))
+                self.treeView_Venta.addTopLevelItem(item)
+                self.on_change_tree()
             self.radioBtn_Despacho.setChecked(True)
         self.radioBtn_Pedidos_Ya.setChecked(False)
         self.radioBtn_Pedidos_Ya.clearMask()
         self.is_pedidos_ya = False
 
     def on_click_PedidosYa_RButton(self):
-        # todo: sacar despacho de la boleta si existe
         if self.is_pedidos_ya:
             if self.radioBtn_Pedidos_Ya.isChecked():
                 self.is_pedidos_ya = False
+                self.treeView_Venta.takeTopLevelItem(self.treeView_Venta.topLevelItemCount()-1)
+                self.on_change_tree()
                 self.radioBtn_Pedidos_Ya.setChecked(False)
                 self.radioBtn_ClearSelection.setChecked(True)
             else:
                 self.is_pedidos_ya = True
+                if self.is_despacho:
+                    self.treeView_Venta.takeTopLevelItem(self.treeView_Venta.topLevelItemCount() - 1)
+                item = QtWidgets.QTreeWidgetItem(self.treeView_Venta)
+                item.setText(0, "Despacho: Pedidos Ya!")
+                item.setText(1, "0")
+                self.treeView_Venta.addTopLevelItem(item)
+                self.on_change_tree()
                 self.radioBtn_Pedidos_Ya.setChecked(True)
         else:
             self.is_pedidos_ya = True
+            if self.is_despacho:
+                self.treeView_Venta.takeTopLevelItem(self.treeView_Venta.topLevelItemCount() - 1)
+            item = QtWidgets.QTreeWidgetItem(self.treeView_Venta)
+            item.setText(0, "Despacho: Pedidos Ya!")
+            item.setText(1, "0")
+            self.treeView_Venta.addTopLevelItem(item)
+            self.on_change_tree()
             self.radioBtn_Pedidos_Ya.setChecked(True)
         self.radioBtn_Despacho.setChecked(False)
         self.is_despacho = False
         self.radioBtn_Despacho.clearMask()
+
+    # def on_nombre_change(self, value):
+    #     print(value)
+    #     QInputMethodQueryEvent(QtCore.Qt.InputMethodQuery.ImEnterKeyType, QVariant(value))
+    #     key_event = QKeyEvent(QEvent(7), , "\n", False, 0)
+    #     self.comboBox_Nombre.keyReleaseEvent(key_event)
+    #     if value != self.nombre_cliente:
+    #         self.nombre_cliente = value
+    #     else:
+    #         self.on_click_buscar()
 
     def on_index_change_nombre(self):
         text = self.comboBox_Nombre.itemText(self.comboBox_Nombre.currentIndex()).split(" - ")
         if len(text) >= 2:
             nombre = text[0]
             direccion = text[1]
-            telefono = self.clientes_en_memoria[nombre]['Telefono']
-            sector = self.clientes_en_memoria[nombre]['Sector']
+            if nombre in self.clientes_en_memoria:
+                telefono = self.clientes_en_memoria[nombre]['Telefono']
+                sector = self.clientes_en_memoria[nombre]['Sector']
+            else:
+                telefono = self.clientes_en_memoria[text]['Telefono']
+                sector = self.clientes_en_memoria[text]['Sector']
             self.lineEdit_Direcion.setText(direccion)
             self.lineEdit_Telefono.setText(str(telefono))
             self.cmb_zona_cliente.setCurrentIndex(sector - 1)
@@ -844,7 +991,6 @@ class Ui_MainWindow(object):
     def on_click_buscar(self):
         if self.comboBox_Nombre.currentText() != "" and self.comboBox_Nombre.count() == 0:
             clientes = ControlModule.get_Clientes_by_name(self.comboBox_Nombre.currentText())
-            self.clientes_en_memoria = {}
             for cliente in clientes:
                 nombre = cliente['Nombre_cliente']
                 direccion = cliente['Direccion']
@@ -854,15 +1000,21 @@ class Ui_MainWindow(object):
             if len(self.clientes_en_memoria) == 0:
                 QMessageBox.warning(self, "Error!", "Cliente no existe en base de datos, creelo antes de continuar.")
             elif len(self.clientes_en_memoria) == 1:
+                self.comboBox_Nombre.setCurrentText(nombre)
                 self.lineEdit_Direcion.setText(direccion)
                 self.lineEdit_Telefono.setText(str(telefono))
                 self.cmb_zona_cliente.setCurrentIndex(sector - 1)
+                self.clientes_en_memoria[nombre] = {'Direccion': direccion, 'Sector': sector, 'Telefono': telefono}
             else:
                 self.comboBox_Nombre.currentIndexChanged.disconnect()
                 for name in self.clientes_en_memoria.keys():
+                    self.clientes_en_memoria[name] = {'Direccion': direccion, 'Sector': sector, 'Telefono': telefono}
                     self.comboBox_Nombre.addItem(name + " - " + self.clientes_en_memoria[name]['Direccion'])
                 self.comboBox_Nombre.setCurrentIndex(-1)
                 self.comboBox_Nombre.currentIndexChanged.connect(self.on_index_change_nombre)
+                self.comboBox_Nombre.showPopup()
+        # elif self.comboBox_Nombre.currentText() == "":
+        #     self.clientes_en_memoria = {}
 
     def on_click_crear(self):
         if self.comboBox_Nombre.currentText() != "" and self.lineEdit_Direcion.text() != "" and \
@@ -883,38 +1035,106 @@ class Ui_MainWindow(object):
                                                 "Ingrese un nombre y una dirección válida.")
 
     def on_click_pagar(self):
-        # todo: revisar pago al registrarse
+        # todo: agregar al inicio los datos del cliente
+        def item_childs_to_dict(item):
+            result = []
+            for j in range(0, item.childCount()):
+                sub_item = None
+                data = item.child(j).text(1).split(": ")
+                if len(data) == 1:
+                    tipo = "Producto"
+                    data = [item.child(j).text(1)]
+                elif len(data) == 2:
+                    tipo = data[0]
+                    data = [item.child(j).text(1), item.child(j).text(2), ""]
+                sub_item = {
+                    'tipo': tipo,
+                    'datos': data
+                }
+                if sub_item:
+                    result.append(sub_item)
+            return result
+
         if self.treeView_Venta.topLevelItemCount() > 0:
             if self.comboBox_Nombre.currentText() != "" \
                     and self.lineEdit_Direcion.text() != "" \
                     and self.lineEdit_Telefono.text() != "" \
                     and ControlModule.get_Cliente(self.comboBox_Nombre.currentText(), self.lineEdit_Direcion.text()):
+                inofrmaion_cliente = {
+                    "nombre: ", self.comboBox_Nombre.currentText(),
+                    "direccion: ", self.lineEdit_Direcion.text(),
+                    "telefono: ", self.lineEdit_Telefono.text(),
+                }
+                if self.is_despacho or self.is_pedidos_ya:
+                    nombre_zona = self.cmb_zona_cliente.currentText()
+                    precio = self.treeView_Venta.topLevelItem(self.treeView_Venta.topLevelItemCount()-1).text(1)
+                else:
+                    nombre_zona = None
+                    precio = None
+                data_despacho = {
+                    'despacho': self.is_despacho,
+                    'pedidos_ya': self.is_pedidos_ya,
+                    'zona': nombre_zona,
+                    'precio': precio
+                }
                 componentes_boleta = {}
                 for i in range(0, self.treeView_Venta.topLevelItemCount()):
                     item = self.treeView_Venta.topLevelItem(i)
-                    componentes_boleta[item.text(0)] = {
-                        'precio': item.text(1),
-                        'sub_items': []
-                    }
-                    for j in range(0, item.childCount()):
-                        sub_item = None
-                        data = item.child(j).text(1).split(": ")
-                        if len(data) == 1:
-                            tipo = "Producto"
-                            data = [item.child(j).text(1)]
-                        elif len(data) == 2:
-                            tipo = data[0]
-                            data = [item.child(j).text(1), item.child(j).text(2), item.child(j).text(3)]
-                        sub_item = {
-                            'tipo': tipo,
-                            'datos': data
+                    if not item.text(0) in componentes_boleta:
+                        componentes_boleta[item.text(0)] = {
+                            'precio': item.text(1),
+                            'tamanio': item.text(3),
+                            'sub_items': [],
+                            'otros': [],
+                            'cantidad': 1
                         }
-                        if sub_item:
-                            componentes_boleta[item.text(0)]['sub_items'].append(sub_item)
+                        componentes_boleta[item.text(0)]['sub_items'] += item_childs_to_dict(item)
+                    else:
+                        temp = {
+                            'precio': item.text(1),
+                            'tamanio': item.text(3),
+                            'sub_items': [],
+                            'otros': [],
+                            'cantidad': componentes_boleta[item.text(0)]['cantidad']
+                        }
+                        if item.childCount() == len(componentes_boleta[item.text(0)]['sub_items']):
+                            temp['sub_items'] += item_childs_to_dict(item)
+                            if temp['sub_items'] == componentes_boleta[item.text(0)]['sub_items']:
+                                componentes_boleta[item.text(0)]['cantidad'] += 1
+                            else:
+                                is_inside = False
+                                for ch in componentes_boleta[item.text(0)]['otros']:
+                                    if temp['sub_items'] == ch['sub_items']:
+                                        is_inside = True
+                                        ch['cantidad'] += 1
+                                        break
+                                if not is_inside:
+                                    temp['cantidad'] = 1
+                                    componentes_boleta[item.text(0)]['otros'].append(temp)
+                        else:
+                            temp['cantidad'] = 1
+                            temp['sub_items'] += item_childs_to_dict(item)
+                            componentes_boleta[item.text(0)]['otros'].append(temp)
+
+                    # for j in range(0, item.childCount()):
+                    #     sub_item = None
+                    #     data = item.child(j).text(1).split(": ")
+                    #     if len(data) == 1:
+                    #         tipo = "Producto"
+                    #         data = [item.child(j).text(1)]
+                    #     elif len(data) == 2:
+                    #         tipo = data[0]
+                    #         data = [item.child(j).text(1), item.child(j).text(2), ""]
+                    #     sub_item = {
+                    #         'tipo': tipo,
+                    #         'datos': data
+                    #     }
+                    #     if sub_item:
+                    #         componentes_boleta[item.text(0)]['sub_items'].append(sub_item)
                 dialog = QDialog()
                 dialog.ui = Pagar_Dialog()
-                dialog.ui.setupUi(dialog, self.user_name, self.comboBox_Nombre.currentText(),
-                                  self.lineEdit_Direcion.text(), self.id_session, componentes_boleta)
+                dialog.ui.setupUi(dialog, self.user_name, inofrmaion_cliente, data_despacho,
+                                  self.id_session, componentes_boleta)
                 rec = dialog.exec()
                 if rec == 1:
                     self.treeView_Venta.clear()
@@ -947,6 +1167,10 @@ class Ui_MainWindow(object):
                     self.listAgregados.addItem(producto['Nombre_producto'])
                 elif categoria == 'Bebidas':
                     self.listBebidas.addItem(producto['Nombre_producto'])
+                    ######################################################################
+                elif categoria == 'Despacho':   # Cargar los despachos a la lista de zonas
+                    self.cmb_zona_cliente.addItem(producto['Nombre_producto'])
+                    ######################################################################
         if promociones:
             for promocion, i in zip(promociones, range(len(promociones))):
                 # if "ñ" in promocion['Nombre_promocion']
@@ -958,6 +1182,7 @@ class Ui_MainWindow(object):
         self.treeView_Venta.setHeaderLabels(["Producto", "Detalle", "Cobros extra"])
         self.treeView_Venta.addActions([self.accion_editar, self.accion_ingrediente, self.accion_comentario])
 
+
     def on_click_action_agregar_productos_CSV(self):
         files = self.buscar_archivo()
         if files:
@@ -968,6 +1193,9 @@ class Ui_MainWindow(object):
                 line = line
                 product = line.split(";")[:6]
                 new_products[headers[0]] = product[0]
+                if product[1] == '':
+                    self.load_buttons()
+                    return
                 new_products[headers[1]] = int(product[1])
                 if product[2]:
                     new_products[headers[2]] = int(product[2])
@@ -994,6 +1222,8 @@ class Ui_MainWindow(object):
             for line in data[1:]:
                 product = line.split(";")[:4]
                 new_promo[headers[0]] = product[0]
+                if product[1] == '':
+                    break
                 new_promo[headers[1]] = int(product[1])
                 new_promo[headers[2]] = int(product[2])
                 new_promo[headers[3]] = int(product[3])
@@ -1014,6 +1244,9 @@ class Ui_MainWindow(object):
                         new_component[headers[2]] = product[2]
                     else:
                         new_component[headers[2]] = None
+                    if product[3] == '':
+                        self.load_buttons()
+                        return
                     new_component[headers[3]] = int(product[3])
                     ControlModule.insert_Componente_promo(new_component)
         self.load_buttons()
@@ -1043,6 +1276,16 @@ class Ui_MainWindow(object):
         if item:
             nombre = item.text(1).split(": ")
             tamanio_precio = item.text(3)
+            if tamanio_precio == '' and item.parent() != self.treeView_Venta:
+                tamanio_precio = item.parent().text(3)
+            if tamanio_precio == '1':
+                tamanio_precio = "Precio_unitario"
+            elif tamanio_precio == '2':
+                tamanio_precio = "Precio_mediana"
+            elif tamanio_precio == '3':
+                tamanio_precio = "Precio_familiar"
+            elif tamanio_precio == "":
+                tamanio_precio = "Precio_unitario"
             dialog = QDialog()
             dialog.ui = Añadir_ingrediente_Dialog()
             dialog.ui.setupUi(dialog, tamanio_precio)
@@ -1081,6 +1324,25 @@ class Ui_MainWindow(object):
                     new_item.setText(1, "Comentario: " + comentario)
                     item.parent().addChild(new_item)
                 self.treeView_Venta.expandAll()
+
+    def on_click_action_boletin_fechas(self):
+        dialog = QDialog()
+        dialog.ui = Exportar_Boletin_Fechas_Dialog()
+        dialog.ui.setupUi(dialog)
+        response = dialog.exec()
+
+
+class CustomCombo(QtWidgets.QComboBox):
+    enter_pressed = QtCore.pyqtSignal()
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    def keyPressEvent(self, event):
+        if event.text() == '\r':
+            self.enter_pressed.emit()
+        else:
+            QtWidgets.QComboBox.keyPressEvent(self, event)
+            # if the key is not return, handle normally
 
 
 class Inicio_session_Dialog(QMainWindow, Ui_inicio_session):
@@ -1146,6 +1408,12 @@ class Eliminar_Usuario_Dialog(QMainWindow, Ui_Eliminar_Usuario_Dialog):
 
 
 class Aniadir_Retiro_Dialog(QMainWindow, Ui_Aniadir_Retiro_Dialog):
+
+    def __init__(self):
+        super().__init__()
+
+
+class Exportar_Boletin_Fechas_Dialog(QMainWindow, UI_Export_Boletin_Fechas_Dialog):
 
     def __init__(self):
         super().__init__()

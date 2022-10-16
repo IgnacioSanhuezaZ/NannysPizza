@@ -42,15 +42,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         dialog = FindReplaceDialog(self)
         dialog.exec()
 
-    def loginForm(self):
-        dialog = QDialog()
-        dialog.ui = Window()
-        dialog.ui.setupUi(dialog)
-        dialog.exec()
-        globals()['access_token'] = dialog.ui.acces_token
-        globals()['user_name'] = dialog.ui.user_name
-        globals()['is_admin'] = dialog.ui.user_admin
-
 
 class FindReplaceDialog(QDialog):
 
