@@ -13,3 +13,4 @@ tabulate==0.8.10
 XlsxWriter==3.0.3
 pyinstaller==5.4.1
 auto-py-to-exe==2.23.1
+openpyxl==3.0.10

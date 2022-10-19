@@ -1,0 +1,16 @@
+PyQt5==5.15.7
+numpy==1.23.3
+pip==22.2.2
+argparse==1.4.0
+wheel==0.37.1
+Pillow==9.2.0
+setuptools==65.4.0
+packaging==21.3
+pyparsing==3.0.9
+zipp==3.8.1
+future==0.18.2
+tabulate==0.8.10
+XlsxWriter==3.0.3
+pyinstaller==5.4.1
+auto-py-to-exe==2.23.1
+openpyxl==3.0.10
