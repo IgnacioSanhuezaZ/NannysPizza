@@ -24,7 +24,7 @@ from Aniadir_retiro_Dialog import Ui_Dialog as Ui_Aniadir_Retiro_Dialog
 from Export_boletin_fechas_Dialog import Ui_Dialog as UI_Export_Boletin_Fechas_Dialog
 from Controller import ControlModule
 
-from numpy import genfromtxt
+from numpy import genfromtxt, iinfo
 import datetime
 
 
@@ -875,6 +875,8 @@ class Ui_MainWindow(object):
         if self.is_despacho or self.is_pedidos_ya:
             if index.row() == self.treeView_Venta.topLevelItemCount()-1:
                 return
+        if ":" in index.data(0):
+            return
         self.treeView_Venta.takeTopLevelItem(index.row())
         self.on_change_tree()
 
@@ -1035,7 +1037,7 @@ class Ui_MainWindow(object):
                                                 "Ingrese un nombre y una dirección válida.")
 
     def on_click_pagar(self):
-        def item_childs_to_dict(item):
+        def item_childs_to_dict(item, cuatro_estaciones = False):
             result = []
             for j in range(0, item.childCount()):
                 sub_item = None
@@ -1046,9 +1048,16 @@ class Ui_MainWindow(object):
                 elif len(data) == 2:
                     tipo = data[0]
                     data = [item.child(j).text(1), item.child(j).text(2), ""]
+                if cuatro_estaciones:
+                    comentarios = []
+                    for k in range(0, item.child(j).childCount()):
+                        comentarios.append([item.child(j).child(k).text(1), item.child(j).child(k).text(2)])
+                else:
+                    comentarios = []
                 sub_item = {
                     'tipo': tipo,
-                    'datos': data
+                    'datos': data,
+                    'comentarios': comentarios
                 }
                 if sub_item:
                     result.append(sub_item)
@@ -1056,9 +1065,11 @@ class Ui_MainWindow(object):
 
         if self.treeView_Venta.topLevelItemCount() > 0:
             if self.comboBox_Nombre.currentText() != "" \
+                    and ( (self.radioBtn_Despacho.isChecked()
                     and self.lineEdit_Direcion.text() != "" \
                     and self.lineEdit_Telefono.text() != "" \
-                    and ControlModule.get_Cliente(self.comboBox_Nombre.currentText(), self.lineEdit_Direcion.text()):
+                    and ControlModule.get_Cliente(self.comboBox_Nombre.currentText(), self.lineEdit_Direcion.text()))
+            or not self.radioBtn_Despacho.isChecked()):
                 inofrmaion_cliente = {
                     "nombre": self.comboBox_Nombre.currentText(),
                     "direccion": self.lineEdit_Direcion.text(),
@@ -1087,7 +1098,11 @@ class Ui_MainWindow(object):
                             'otros': [],
                             'cantidad': 1
                         }
-                        componentes_boleta[item.text(0)]['sub_items'] += item_childs_to_dict(item)
+                        if "Cuatro Estaciones" in item.text(0):
+                            next_is_4_estaciones = True
+                        else:
+                            next_is_4_estaciones = False
+                        componentes_boleta[item.text(0)]['sub_items'] += item_childs_to_dict(item, next_is_4_estaciones)
                     else:
                         temp = {
                             'precio': item.text(1),

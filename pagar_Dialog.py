@@ -8,8 +8,10 @@ import numpy as np
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QSize, QSizeF
+from PyQt5.QtGui import QPagedPaintDevice, QFont
 
-from PyQt5.QtPrintSupport import QPrintDialog
+from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 
 from Controller.ControlModule import set_boleta
 
@@ -214,17 +216,32 @@ class Ui_Pagar_Dialog(QtWidgets.QDialog):
     def handlePrint(self):
         dialog = QPrintDialog()
         if dialog.exec_() == QtWidgets.QDialog.Accepted:
+            print(dialog.printer().margins())
+            print(dialog.printer().pageSizeMM())
+            # dialog.printer().setMargins(QPagedPaintDevice.Margins(dialog.printer(), QtCore.QMarginsF(0, 1, 0, 1)))
+            print(dialog.printer().margins())
+            dialog.printer().setPageMargins(0, 0, 0, 0, QPrinter.Unit.Millimeter)
+            dialog.printer().setPageSizeMM(QSizeF(68, 5800))
+            print(dialog.printer().pageSizeMM())
+            dialog.printer().setFullPage(True)
+            dialog.printer().setResolution(600)
+            dialog.printer().setPaperSize(QSizeF(68, 5800), QPrinter.Unit.Millimeter)
+            dialog.printer().setPaperSource(QPrinter.PaperSource.LargeCapacity)
+            font = QFont("Times", 5, -1, False)
+            font.setHintingPreference(QFont.HintingPreference.PreferVerticalHinting)
+            font.setStretch(87)
+            self.editor.document().setDefaultFont(font)
             self.editor.document().print_(dialog.printer())
 
     def tree_to_text(self):
         def item_to_text(item, key):
             data_list = []
-            data_list.append(["Nombre: ", self.nombre_cliente, ""])
-            data_list.append(["Dirección: ", self.direccion_cliente, ""])
-            data_list.append(["Teléfono: ", self.telefono_cliente, ""])
             total = 0
-            data_list.append([key, "", item['precio']])
-            temp = [[key, "", item['precio']]]
+            key_splitted = key.split("-")
+            key = key_splitted[0]
+            detalle= key_splitted[1]
+            data_list.append([key, detalle, item['precio']])
+            temp = [[key, detalle, item['precio']]]
             temp_total = int(item['precio'])
             total += int(item['precio'])
             for e in item['sub_items']:
@@ -237,11 +254,23 @@ class Ui_Pagar_Dialog(QtWidgets.QDialog):
                 else:
                     data_list.append(["", e['datos'][0], ""])
                     temp.append(["", e['datos'][0], ""])
+                if "Cuatro Estaciones" in key:
+                    for coment in e['comentarios']:
+                        if len(coment) > 1:
+                            data_list.append(["", coment[0], coment[1]])
+                            temp.append(["", coment[0], coment[1]])
+                        else:
+                            data_list.append(["", coment[0], ""])
+                            temp.append(["", coment[0], ""])
             if item['cantidad'] > 1:
                 data_list += temp * (item['cantidad'] - 1)
                 total += temp_total * (item['cantidad'] - 1)
             return data_list, total
         data_list = []
+        data_list.append(["Nombre: ", self.nombre_cliente, ""])
+        data_list.append(["Dirección: ", self.direccion_cliente, ""])
+        data_list.append(["Teléfono: ", "+" + self.telefono_cliente, ""])
+        data_list.append(["-------- +", " -------- + ", "--------"])
         total = 0
         for key in self.items_boleta.keys():
             values, num_val = item_to_text(self.items_boleta[key], key)
@@ -294,12 +323,15 @@ class Ui_Pagar_Dialog(QtWidgets.QDialog):
                                      headers=["Producto", "Detalle", "Monto"],
                                      tablefmt="html",
                                      colalign=("center","stralign",),
-                                     numalign="center")
+                                     numalign="center",
+                                     missingval=" ")
         # length_margins = string_formated.find("╕")
         print(string_formated)
         # print(length_margins)
         # self.editor.document().setPageSize(QSizeF(0.0, float(length_margins+1)))
         self.editor.document().setDocumentMargin(1)
+        self.editor.document().setPageSize(QSizeF(68, 5800))
+        self.editor.document().setTextWidth(1)
         self.editor.setHtml(string_formated)
         # self.editor.setText(string_formated)
 
