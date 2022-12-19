@@ -13,7 +13,7 @@ from PyQt5.QtGui import QPagedPaintDevice, QFont
 
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 
-from Controller.ControlModule import set_boleta
+from Controller.ControlModule import set_boleta, verificar_existencia_cliente, set_client
 
 from tabulate import tabulate
 
@@ -131,6 +131,8 @@ class Ui_Pagar_Dialog(QtWidgets.QDialog):
         nombre_cliente = self.nombre_cliente
         direccion = self.direccion_cliente
         id_sesion = self.id_sesion
+        if not verificar_existencia_cliente((nombre_cliente, direccion, )):
+            set_client((nombre_cliente, direccion, 1, 0, ))
         if self.radioButton_efectivo.isChecked():
             efectivo = 1
         else:

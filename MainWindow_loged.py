@@ -1069,7 +1069,7 @@ class Ui_MainWindow(object):
                     and self.lineEdit_Direcion.text() != "" \
                     and self.lineEdit_Telefono.text() != "" \
                     and ControlModule.get_Cliente(self.comboBox_Nombre.currentText(), self.lineEdit_Direcion.text()))
-            or not self.radioBtn_Despacho.isChecked()):
+            or (not self.radioBtn_Despacho.isChecked() and self.comboBox_Nombre.currentText())):
                 inofrmaion_cliente = {
                     "nombre": self.comboBox_Nombre.currentText(),
                     "direccion": self.lineEdit_Direcion.text(),
@@ -1157,7 +1157,8 @@ class Ui_MainWindow(object):
                     self.lineEdit_Direcion.clear()
                     self.cmb_zona_cliente.setCurrentIndex(0)
             else:
-                QMessageBox.warning(self, "Error!", "Debe ingresar un cliente para procesar el pago."
+                QMessageBox.warning(self, "Error!", "Debe ingresar un cliente para procesar el pago con despacho, o"
+                                                    " sólo el nombre.\n"
                                                     "Ingrese cliente.")
 
     def load_buttons(self):

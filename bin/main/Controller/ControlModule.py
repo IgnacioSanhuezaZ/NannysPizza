@@ -33,6 +33,18 @@ def verificar_existencia_usuario(credenciales):
     return usu_tipo_usuario
 
 
+def verificar_existencia_cliente(credenciales):
+    """Keys: (Nombre_cliente, Direccion, )"""
+    cursor = db.get_db()
+    usu_tipo_usuario = db.GetClient(tuple(credenciales))
+    if not usu_tipo_usuario:
+        QMessageBox.warning(None, "Error!", "Cliente no existe. Ingrese un cliente válido o cree uno nuevo!")
+        cursor.close()
+        return False
+    cursor.close()
+    return True
+
+
 def Ingreso_cuenta(args):
     cursor = db.get_db()
     verify = db.selectUser("WHERE Nombre_usuario = ? AND Contrasena = ?;", cursor, (args[0], args[1],))
