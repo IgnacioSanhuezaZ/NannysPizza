@@ -5,5 +5,5 @@ Software de caja para pizzería
 
 ## Pre-requisitos:
 
-- Python 3.10 32 bits
+- Python 3.8 32 bits
 - Git for Windows 32 bits
